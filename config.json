@@ -1,6 +1,7 @@
 {
     "confessionChannels": [
-        "1394128007966232646"
+        "1368572151979970630",
+        "1392916303840280597"
     ],
     "adminRoles": [
         "Admin",
@@ -21,11 +22,13 @@
     "allowTextOnly": true,
     "allowImageOnly": true,
     "allowBoth": true,
-    "logChannelId": "1394128154242842655",
+    "logChannelId": "1360897920466948159",
     "autoThreadSettings": {
         "enabled": true,
         "channels": [
-            "1394128007966232646"
+            "1394128007966232646",
+            "1368572151979970630",
+            "1392916303840280597"
         ],
         "threadName": "Discussion - Confession #{count}",
         "archiveAfter": 10080,
