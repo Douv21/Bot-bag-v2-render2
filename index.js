@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
 const countingManager = require('./Utils/countingManager');
-const dataManager = require('./utils/dataManager');
+const dataManager = require('./Utils/dataManager');
 
 // Configuration pour Render.com
 const PORT = process.env.PORT || 3000;
