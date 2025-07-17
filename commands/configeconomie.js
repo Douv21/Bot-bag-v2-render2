@@ -3,6 +3,7 @@ const {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
+  StringSelectMenuBuilder,
   EmbedBuilder
 } = require('discord.js');
 
@@ -30,37 +31,75 @@ module.exports = {
         .setStyle(ButtonStyle.Primary)
     );
 
-    // ✅ Répond rapidement avec defer
-    await interaction.deferReply({ ephemeral: true });
+    const select = new ActionRowBuilder().addComponents(
+      new StringSelectMenuBuilder()
+        .setCustomId('menu_config')
+        .setPlaceholder('🔽 Choisissez un paramètre')
+        .addOptions(
+          {
+            label: 'Taux de gain',
+            value: 'gain'
+          },
+          {
+            label: 'Limite journalière',
+            value: 'daily_limit'
+          }
+        )
+    );
+
+    await interaction.deferReply({ flags: 64 }); // ⇨ réponse éphémère moderne
 
     await interaction.editReply({
       embeds: [embed],
-      components: [buttons]
+      components: [buttons, select]
     });
   },
 
   async handleInteraction(interaction) {
-    if (!interaction.isButton()) return;
-
     const { customId } = interaction;
 
-    let response = '';
-    switch (customId) {
-      case 'param1':
-        response = '🔧 Vous avez sélectionné **Paramètre 1**.';
-        break;
-      case 'param2':
-        response = '🔧 Vous avez sélectionné **Paramètre 2**.';
-        break;
-      default:
-        response = '❓ Option inconnue.';
-        break;
+    // Gestion des boutons
+    if (interaction.isButton()) {
+      let response = '';
+
+      switch (customId) {
+        case 'param1':
+          response = '🔧 Vous avez sélectionné **Paramètre 1**.';
+          break;
+        case 'param2':
+          response = '🔧 Vous avez sélectionné **Paramètre 2**.';
+          break;
+        default:
+          response = '❓ Option inconnue.';
+          break;
+      }
+
+      return await interaction.reply({
+        content: response,
+        flags: 64
+      });
     }
 
-    // ✅ Assure-toi de répondre rapidement
-    await interaction.reply({
-      content: response,
-      ephemeral: true
-    });
+    // Gestion du select menu
+    if (interaction.isStringSelectMenu()) {
+      let response = '';
+
+      switch (interaction.values[0]) {
+        case 'gain':
+          response = '💸 Vous avez choisi de modifier le **taux de gain**.';
+          break;
+        case 'daily_limit':
+          response = '📅 Vous avez choisi de modifier la **limite journalière**.';
+          break;
+        default:
+          response = '❓ Option de menu inconnue.';
+          break;
+      }
+
+      return await interaction.reply({
+        content: response,
+        flags: 64
+      });
+    }
   }
 };
