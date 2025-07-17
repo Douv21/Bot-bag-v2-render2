@@ -1,0 +1,45 @@
+{
+    "confessionChannels": [
+        "1394128007966232646"
+    ],
+    "adminRoles": [
+        "Admin",
+        "Moderator"
+    ],
+    "rateLimitWindow": 300000,
+    "rateLimitMax": 5,
+    "maxTextLength": 4000,
+    "allowedImageTypes": [
+        "image/png",
+        "image/jpg",
+        "image/jpeg",
+        "image/gif",
+        "image/webp"
+    ],
+    "maxImageSize": 8388608,
+    "requireContent": false,
+    "allowTextOnly": true,
+    "allowImageOnly": true,
+    "allowBoth": true,
+    "logChannelId": "1394128154242842655",
+    "autoThreadSettings": {
+        "enabled": true,
+        "channels": [
+            "1394128007966232646"
+        ],
+        "threadName": "Discussion - Confession #{count}",
+        "archiveAfter": 10080,
+        "slowMode": 0
+    },
+    "globalAutoThread": {
+        "enabled": true,
+        "channels": [
+            "1394128154242842655",
+            "1394128007966232646"
+        ],
+        "threadName": "Discussion - Message #{count}",
+        "archiveAfter": 60,
+        "slowMode": 0,
+        "excludeConfessions": false
+    }
+}
