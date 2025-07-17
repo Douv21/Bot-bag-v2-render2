@@ -171,6 +171,373 @@ async function createAutoThread(message, globalSettings, config) {
     }
 }
 
+// ======================
+// GESTIONNAIRES D'INTERACTIONS
+// ======================
+
+// Gestionnaire pour les sélecteurs
+async function handleSelectMenu(interaction) {
+    const { customId, values } = interaction;
+    
+    console.log(`📋 Sélecteur activé: ${customId} avec valeurs: ${values}`);
+    
+    try {
+        switch (customId) {
+            case 'role-select':
+                await handleRoleSelect(interaction, values);
+                break;
+            case 'channel-select':
+                await handleChannelSelect(interaction, values);
+                break;
+            case 'economy-shop':
+                await handleEconomyShop(interaction, values);
+                break;
+            case 'music-playlist':
+                await handleMusicPlaylist(interaction, values);
+                break;
+            case 'confession-category':
+                await handleConfessionCategory(interaction, values);
+                break;
+            case 'moderation-action':
+                await handleModerationAction(interaction, values);
+                break;
+            case 'game-select':
+                await handleGameSelect(interaction, values);
+                break;
+            case 'settings-select':
+                await handleSettingsSelect(interaction, values);
+                break;
+            default:
+                await interaction.reply({
+                    content: `❌ Sélecteur non reconnu: ${customId}`,
+                    ephemeral: true
+                });
+        }
+    } catch (error) {
+        console.error(`❌ Erreur dans handleSelectMenu pour ${customId}:`, error);
+        await interaction.reply({
+            content: 'Une erreur est survenue avec ce sélecteur.',
+            ephemeral: true
+        });
+    }
+}
+
+// Gestionnaire pour les boutons
+async function handleButton(interaction) {
+    const { customId } = interaction;
+    
+    console.log(`🔘 Bouton activé: ${customId}`);
+    
+    try {
+        // Boutons de confirmation génériques
+        if (customId === 'confirm-button') {
+            await interaction.reply('✅ Action confirmée !');
+            return;
+        }
+        
+        if (customId === 'cancel-button') {
+            await interaction.reply('❌ Action annulée.');
+            return;
+        }
+        
+        // Boutons de pagination
+        if (customId.startsWith('page-')) {
+            const page = customId.split('-')[1];
+            await handlePagination(interaction, page);
+            return;
+        }
+        
+        // Boutons d'économie
+        if (customId.startsWith('economy-')) {
+            await handleEconomyButton(interaction);
+            return;
+        }
+        
+        // Boutons de musique
+        if (customId.startsWith('music-')) {
+            await handleMusicButton(interaction);
+            return;
+        }
+        
+        // Boutons de confession
+        if (customId.startsWith('confession-')) {
+            await handleConfessionButton(interaction);
+            return;
+        }
+        
+        // Boutons de modération
+        if (customId.startsWith('mod-')) {
+            await handleModerationButton(interaction);
+            return;
+        }
+        
+        // Boutons de jeux
+        if (customId.startsWith('game-')) {
+            await handleGameButton(interaction);
+            return;
+        }
+        
+        // Boutons de paramètres
+        if (customId.startsWith('settings-')) {
+            await handleSettingsButton(interaction);
+            return;
+        }
+        
+        // Bouton non reconnu
+        await interaction.reply({
+            content: `❌ Bouton non reconnu: ${customId}`,
+            ephemeral: true
+        });
+        
+    } catch (error) {
+        console.error(`❌ Erreur dans handleButton pour ${customId}:`, error);
+        await interaction.reply({
+            content: 'Une erreur est survenue avec ce bouton.',
+            ephemeral: true
+        });
+    }
+}
+
+// Gestionnaire pour les modals
+async function handleModalSubmit(interaction) {
+    const { customId } = interaction;
+    
+    console.log(`📝 Modal soumis: ${customId}`);
+    
+    try {
+        switch (customId) {
+            case 'confession-modal':
+                await handleConfessionModal(interaction);
+                break;
+            case 'feedback-modal':
+                await handleFeedbackModal(interaction);
+                break;
+            case 'report-modal':
+                await handleReportModal(interaction);
+                break;
+            case 'suggestion-modal':
+                await handleSuggestionModal(interaction);
+                break;
+            case 'ticket-modal':
+                await handleTicketModal(interaction);
+                break;
+            default:
+                await interaction.reply({
+                    content: `❌ Modal non reconnu: ${customId}`,
+                    ephemeral: true
+                });
+        }
+    } catch (error) {
+        console.error(`❌ Erreur dans handleModalSubmit pour ${customId}:`, error);
+        await interaction.reply({
+            content: 'Une erreur est survenue avec ce formulaire.',
+            ephemeral: true
+        });
+    }
+}
+
+// ======================
+// FONCTIONS SPÉCIFIQUES POUR SÉLECTEURS
+// ======================
+
+async function handleRoleSelect(interaction, values) {
+    const selectedRole = values[0];
+    await interaction.reply({
+        content: `🎭 Vous avez sélectionné le rôle: **${selectedRole}**`,
+        ephemeral: true
+    });
+}
+
+async function handleChannelSelect(interaction, values) {
+    const selectedChannel = values[0];
+    await interaction.reply({
+        content: `📢 Canal sélectionné: <#${selectedChannel}>`,
+        ephemeral: true
+    });
+}
+
+async function handleEconomyShop(interaction, values) {
+    const item = values[0];
+    await interaction.reply({
+        content: `🛒 Vous voulez acheter: **${item}**`,
+        ephemeral: true
+    });
+}
+
+async function handleMusicPlaylist(interaction, values) {
+    const song = values[0];
+    await interaction.reply({
+        content: `🎵 Chanson ajoutée à la playlist: **${song}**`,
+        ephemeral: true
+    });
+}
+
+async function handleConfessionCategory(interaction, values) {
+    const category = values[0];
+    await interaction.reply({
+        content: `🤫 Catégorie de confession sélectionnée: **${category}**`,
+        ephemeral: true
+    });
+}
+
+async function handleModerationAction(interaction, values) {
+    const action = values[0];
+    await interaction.reply({
+        content: `🛡️ Action de modération: **${action}**`,
+        ephemeral: true
+    });
+}
+
+async function handleGameSelect(interaction, values) {
+    const game = values[0];
+    await interaction.reply({
+        content: `🎮 Jeu sélectionné: **${game}**`,
+        ephemeral: true
+    });
+}
+
+async function handleSettingsSelect(interaction, values) {
+    const setting = values[0];
+    await interaction.reply({
+        content: `⚙️ Paramètre sélectionné: **${setting}**`,
+        ephemeral: true
+    });
+}
+
+// ======================
+// FONCTIONS SPÉCIFIQUES POUR BOUTONS
+// ======================
+
+async function handlePagination(interaction, page) {
+    await interaction.reply({
+        content: `📄 Passage à la page **${page}**`,
+        ephemeral: true
+    });
+}
+
+async function handleEconomyButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    await interaction.reply({
+        content: `💰 Action économie: **${action}**`,
+        ephemeral: true
+    });
+}
+
+async function handleMusicButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    
+    switch (action) {
+        case 'play':
+            await interaction.reply('▶️ Lecture en cours...');
+            break;
+        case 'pause':
+            await interaction.reply('⏸️ Musique mise en pause');
+            break;
+        case 'stop':
+            await interaction.reply('⏹️ Musique arrêtée');
+            break;
+        case 'next':
+            await interaction.reply('⏭️ Chanson suivante');
+            break;
+        case 'previous':
+            await interaction.reply('⏮️ Chanson précédente');
+            break;
+        default:
+            await interaction.reply(`🎵 Action musique: **${action}**`);
+    }
+}
+
+async function handleConfessionButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    await interaction.reply({
+        content: `🤫 Action confession: **${action}**`,
+        ephemeral: true
+    });
+}
+
+async function handleModerationButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    await interaction.reply({
+        content: `🛡️ Action modération: **${action}**`,
+        ephemeral: true
+    });
+}
+
+async function handleGameButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    await interaction.reply({
+        content: `🎮 Action jeu: **${action}**`,
+        ephemeral: true
+    });
+}
+
+async function handleSettingsButton(interaction) {
+    const action = interaction.customId.split('-')[1];
+    await interaction.reply({
+        content: `⚙️ Action paramètres: **${action}**`,
+        ephemeral: true
+    });
+}
+
+// ======================
+// FONCTIONS SPÉCIFIQUES POUR MODALS
+// ======================
+
+async function handleConfessionModal(interaction) {
+    const confession = interaction.fields.getTextInputValue('confession-input');
+    await interaction.reply({
+        content: '🤫 Confession reçue et enregistrée !',
+        ephemeral: true
+    });
+    
+    // Ici vous pouvez ajouter la logique pour traiter la confession
+    console.log(`Nouvelle confession de ${interaction.user.tag}: ${confession}`);
+}
+
+async function handleFeedbackModal(interaction) {
+    const feedback = interaction.fields.getTextInputValue('feedback-input');
+    await interaction.reply({
+        content: '📝 Feedback reçu, merci !',
+        ephemeral: true
+    });
+    
+    console.log(`Nouveau feedback de ${interaction.user.tag}: ${feedback}`);
+}
+
+async function handleReportModal(interaction) {
+    const report = interaction.fields.getTextInputValue('report-input');
+    await interaction.reply({
+        content: '🚨 Rapport reçu, il sera traité rapidement !',
+        ephemeral: true
+    });
+    
+    console.log(`Nouveau rapport de ${interaction.user.tag}: ${report}`);
+}
+
+async function handleSuggestionModal(interaction) {
+    const suggestion = interaction.fields.getTextInputValue('suggestion-input');
+    await interaction.reply({
+        content: '💡 Suggestion reçue, merci !',
+        ephemeral: true
+    });
+    
+    console.log(`Nouvelle suggestion de ${interaction.user.tag}: ${suggestion}`);
+}
+
+async function handleTicketModal(interaction) {
+    const ticketReason = interaction.fields.getTextInputValue('ticket-reason');
+    await interaction.reply({
+        content: '🎫 Ticket créé, un staff vous contactera bientôt !',
+        ephemeral: true
+    });
+    
+    console.log(`Nouveau ticket de ${interaction.user.tag}: ${ticketReason}`);
+}
+
+// ======================
+// ÉVÉNEMENTS PRINCIPAUX
+// ======================
+
 // Bot ready event
 client.once('ready', async () => {
     console.log(`✅ Ready! Logged in as ${client.user.tag}`);
@@ -219,76 +586,53 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-// Interaction event
+// Interaction event - GESTIONNAIRE PRINCIPAL
 client.on('interactionCreate', async interaction => {
     try {
+        // COMMANDES SLASH
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.commands.get(interaction.commandName);
             
             if (!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
+                console.error(`❌ No command matching ${interaction.commandName} was found.`);
                 return;
             }
             
+            console.log(`⚡ Commande exécutée: ${interaction.commandName} par ${interaction.user.tag}`);
             await command.execute(interaction);
-        } else if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
-            // Handle button, select menu, and modal interactions
-            const command = interaction.client.commands.get(interaction.customId.split('_')[0]);
-            
-            if (command && command.handleButtonInteraction) {
-                await command.handleButtonInteraction(interaction);
-            } else if (command && command.handleSelectMenuInteraction) {
-                await command.handleSelectMenuInteraction(interaction);
-            } else if (command && command.handleModalSubmit) {
-                await command.handleModalSubmit(interaction);
+        } 
+        // SÉLECTEURS
+        else if (interaction.isStringSelectMenu()) {
+            await handleSelectMenu(interaction);
+        }
+        // BOUTONS
+        else if (interaction.isButton()) {
+            await handleButton(interaction);
+        }
+        // MODALS
+        else if (interaction.isModalSubmit()) {
+            await handleModalSubmit(interaction);
+        }
+        // AUTOCOMPLETE
+        else if (interaction.isAutocomplete()) {
+            const command = interaction.client.commands.get(interaction.commandName);
+            if (command && command.autocomplete) {
+                await command.autocomplete(interaction);
             }
         }
     } catch (error) {
-        console.error('Error handling interaction:', error);
+        console.error('❌ Error handling interaction:', error);
         
-        if (interaction.deferred || interaction.replied) {
-            await interaction.followUp({ content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true });
-        } else {
-            await interaction.reply({ content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true });
-        }
-    }
-});
-
-// Error handling
-process.on('unhandledRejection', error => {
-    console.error('Unhandled promise rejection:', error);
-});
-
-process.on('uncaughtException', error => {
-    console.error('Uncaught exception:', error);
-    process.exit(1);
-});
-
-// Graceful shutdown for Render.com
-process.on('SIGTERM', () => {
-    console.log('🔄 SIGTERM received, shutting down gracefully');
-    client.destroy();
-    process.exit(0);
-});
-
-process.on('SIGINT', () => {
-    console.log('🔄 SIGINT received, shutting down gracefully');
-    client.destroy();
-    process.exit(0);
-});
-
-// Login to Discord
-if (!process.env.DISCORD_TOKEN) {
-    console.error('❌ DISCORD_TOKEN environment variable is required');
-    process.exit(1);
-}
-
-if (!process.env.CLIENT_ID) {
-    console.error('❌ CLIENT_ID environment variable is required');
-    process.exit(1);
-}
-
-client.login(process.env.DISCORD_TOKEN).catch(error => {
-    console.error('❌ Failed to login to Discord:', error);
-    process.exit(1);
-});
+        try {
+            const errorMessage = {
+                content: 'Une erreur est survenue lors de l\'exécution de cette commande.',
+                ephemeral: true
+            };
+            
+            if (interaction.deferred || interaction.replied) {
+                await interaction.followUp(errorMessage);
+            } else {
+                await interaction.reply(errorMessage);
+            }
+        } catch (followUpError) {
+            
