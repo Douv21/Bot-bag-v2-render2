@@ -3,7 +3,7 @@ const { Client, GatewayIntentBits, Collection, REST, Routes } = require('discord
 const fs = require('fs');
 const path = require('path');
 const config = require('./config.json');
-const countingManager = require('./utils/countingManager');
+const countingManager = require('/utils/countingManager');
 const dataManager = require('/utils/dataManager');
 
 // Configuration pour Render.com
