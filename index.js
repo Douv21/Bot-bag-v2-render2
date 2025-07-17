@@ -126,7 +126,7 @@ client.on('interactionCreate', async interaction => {
             if (!interaction.replied && !interaction.deferred) {
                 interaction.reply({
                     content: '⚠️ Délai d\'attente dépassé. Veuillez réessayer.',
-                    ephemeral: true
+                    flags: 64
                 }).catch(console.error);
             }
         }, 10000);
@@ -205,7 +205,7 @@ client.on('interactionCreate', async interaction => {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Une erreur s\'est produite. Veuillez réessayer.',
-                    ephemeral: true
+                    flags: 64
                 });
             } else if (interaction.deferred) {
                 await interaction.editReply({
