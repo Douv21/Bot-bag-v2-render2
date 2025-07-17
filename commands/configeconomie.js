@@ -43,8 +43,9 @@ module.exports = {
             console.error('Erreur configeconomie execute:', error);
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
-                    content: '❌ Erreur lors de l\'exécution de la commande.',
-                    ephemeral: true
+  content: 'Texte',
+  flags: 64 // équivalent à `ephemeral: true`
+});
                 });
             }
         }
