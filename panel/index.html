@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Configuration - Bot Confession</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🤖 Bot Confession</h1>
+            <div class="bot-status">
+                <span id="bot-status" class="status offline">Déconnecté</span>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="confessions">
+                📝 Confessions
+            </button>
+            <button class="tab-btn" data-tab="autothread">
+                🧵 Auto-Thread
+            </button>
+            <button class="tab-btn" data-tab="stats">
+                📊 Statistiques
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <!-- Section Confessions -->
+            <div id="confessions" class="tab-content active">
+                <div class="card">
+                    <h2>Configuration des Confessions</h2>
+                    
+                    <!-- Sélection du serveur -->
+                    <div class="form-group">
+                        <label>Serveur Discord</label>
+                        <select id="guild-select" class="select-input">
+                            <option value="">Sélectionner un serveur...</option>
+                        </select>
+                    </div>
+
+                    <!-- Canaux de confession -->
+                    <div class="section">
+                        <h3>Canaux de Confession</h3>
+                        <div class="input-group">
+                            <select id="confession-channel-select" class="select-input" disabled>
+                                <option value="">Sélectionner un canal...</option>
+                            </select>
+                            <button id="add-confession-channel" class="btn btn-primary" disabled>
+                                Ajouter
+                            </button>
+                        </div>
+                        
+                        <div class="channels-list">
+                            <h4>Canaux configurés</h4>
+                            <ul id="confession-channels-list" class="list">
+                                <li class="empty">Aucun canal configuré</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Canal de logs -->
+                    <div class="section">
+                        <h3>Canal de Logs Admin</h3>
+                        <div class="input-group">
+                            <select id="log-channel-select" class="select-input" disabled>
+                                <option value="">Aucun canal de log</option>
+                            </select>
+                            <button id="set-log-channel" class="btn btn-secondary" disabled>
+                                Définir
+                            </button>
+                        </div>
+                        <div class="info">
+                            Canal actuel: <span id="current-log-channel">Aucun</span>
+                        </div>
+                    </div>
+
+                    <!-- Auto-thread pour confessions -->
+                    <div class="section">
+                        <h3>Auto-Thread des Confessions</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="confession-autothread-enabled">
+                                <span>Créer automatiquement des threads pour les confessions</span>
+                            </label>
+                        </div>
+                        
+                        <div id="confession-autothread-settings" class="settings-group" style="display:none;">
+                            <div class="form-group">
+                                <label>Nom du thread</label>
+                                <input type="text" id="confession-thread-name" class="text-input" 
+                                       value="Discussion - Confession #{count}" maxlength="100">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Durée d'archivage</label>
+                                <select id="confession-thread-archive" class="select-input">
+                                    <option value="60">1 heure</option>
+                                    <option value="1440">24 heures</option>
+                                    <option value="4320">3 jours</option>
+                                    <option value="10080" selected>1 semaine</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Mode lent (secondes)</label>
+                                <input type="number" id="confession-thread-slowmode" class="text-input" 
+                                       value="0" min="0" max="21600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs récents -->
+                    <div class="section">
+                        <h3>Logs Récents</h3>
+                        <div class="input-group">
+                            <select id="logs-limit" class="select-input">
+                                <option value="10">10 derniers</option>
+                                <option value="25">25 derniers</option>
+                                <option value="50">50 derniers</option>
+                            </select>
+                            <button id="refresh-logs" class="btn btn-secondary">
+                                Actualiser
+                            </button>
+                        </div>
+                        
+                        <div id="logs-container" class="logs-container">
+                            <p class="empty">Aucune confession trouvée</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Auto-Thread Global -->
+            <div id="autothread" class="tab-content">
+                <div class="card">
+                    <h2>Auto-Thread Global</h2>
+                    <p class="description">Système Needle : crée automatiquement des threads pour tous les messages</p>
+                    
+                    <!-- Configuration des canaux -->
+                    <div class="section">
+                        <h3>Canaux Auto-Thread</h3>
+                        <div class="input-group">
+                            <select id="autothread-channel-select" class="select-input" disabled>
+                                <option value="">Sélectionner un canal...</option>
+                            </select>
+                            <button id="add-autothread-channel" class="btn btn-primary" disabled>
+                                Ajouter
+                            </button>
+                        </div>
+                        
+                        <div class="channels-list">
+                            <h4>Canaux configurés</h4>
+                            <ul id="autothread-channels-list" class="list">
+                                <li class="empty">Aucun canal configuré</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Paramètres auto-thread -->
+                    <div class="section">
+                        <h3>Paramètres</h3>
+                        
+                        <div class="form-group">
+                            <label>Nom des threads</label>
+                            <input type="text" id="autothread-name" class="text-input" 
+                                   value="Discussion - Message #{count}" maxlength="100">
+                            <small>#{count} sera remplacé par le numéro du thread</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Durée d'archivage automatique</label>
+                            <select id="autothread-archive-time" class="select-input">
+                                <option value="60" selected>1 heure</option>
+                                <option value="1440">24 heures</option>
+                                <option value="4320">3 jours</option>
+                                <option value="10080">1 semaine</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mode lent (secondes)</label>
+                            <input type="number" id="autothread-slowmode" class="text-input" 
+                                   value="0" min="0" max="21600">
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="autothread-exclude-confessions" checked>
+                                <span>Exclure les canaux de confession</span>
+                            </label>
+                        </div>
+
+                        <button id="save-autothread-settings" class="btn btn-success">
+                            Sauvegarder les Paramètres
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Statistiques -->
+            <div id="stats" class="tab-content">
+                <div class="card">
+                    <h2>Statistiques</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-confessions">0</div>
+                            <div class="stat-label">Confessions totales</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number" id="unique-users">0</div>
+                            <div class="stat-label">Utilisateurs uniques</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number" id="last-24h">0</div>
+                            <div class="stat-label">Dernières 24h</div>
+                        </div>
+                        
+                        <div class="stat-item">
+                            <div class="stat-number" id="guild-count">0</div>
+                            <div class="stat-label">Serveurs</div>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h3>Répartition par type</h3>
+                        <div class="chart-container">
+                            <div class="chart-item">
+                                <span class="chart-label">Texte seulement</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" id="text-only-bar"></div>
+                                </div>
+                                <span class="chart-value" id="text-only-count">0</span>
+                            </div>
+                            
+                            <div class="chart-item">
+                                <span class="chart-label">Image seulement</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" id="image-only-bar"></div>
+                                </div>
+                                <span class="chart-value" id="image-only-count">0</span>
+                            </div>
+                            
+                            <div class="chart-item">
+                                <span class="chart-label">Texte + Image</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" id="both-bar"></div>
+                                </div>
+                                <span class="chart-value" id="both-count">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p id="loading-message">Chargement...</p>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
