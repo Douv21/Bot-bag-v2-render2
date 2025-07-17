@@ -10,6 +10,15 @@ const dataManager = require('./utils/dataManager');
 const PORT = process.env.PORT || 3000;
 const isRenderEnvironment = process.env.RENDER || false;
 
+// Create Discord client FIRST
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
+    ]
+});
+
 // Keep-alive simplifié pour Render
 function startKeepAlive() {
     const express = require('express');
@@ -41,15 +50,6 @@ function startKeepAlive() {
     });
 }
 
-// Create Discord client
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
-});
-
 // Initialize commands collection
 client.commands = new Collection();
 
@@ -79,12 +79,12 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 async function deployCommands() {
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
+        
         const data = await rest.put(
             Routes.applicationCommands(process.env.CLIENT_ID),
             { body: commands },
         );
-
+        
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     } catch (error) {
         console.error('Error deploying commands:', error);
@@ -600,7 +600,8 @@ client.on('interactionCreate', async interaction => {
             
             console.log(`⚡ Commande exécutée: ${interaction.commandName} par ${interaction.user.tag}`);
             await command.execute(interaction);
-        } 
+        }
+        
         // SÉLECTEURS
         else if (interaction.isStringSelectMenu()) {
             await handleSelectMenu(interaction);
@@ -634,5 +635,4 @@ client.on('interactionCreate', async interaction => {
             } else {
                 await interaction.reply(errorMessage);
             }
-        } catch (followUpError) {
-            
+        } catch 
