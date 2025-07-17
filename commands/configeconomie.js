@@ -19,6 +19,7 @@ module.exports = {
 
     async execute(interaction) {
         try {
+            // Vérifier les permissions avec le système de rôles staff
             const staffCommand = interaction.client.commands.get('staff');
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
@@ -233,5 +234,204 @@ module.exports = {
         }
     },
 
-    // ... reste du code identique (méthodes showMainEconomyConfig, showActionsConfig, etc.)
-};
+    async showMainEconomyConfig(interaction) {
+        try {
+            const embed = new EmbedBuilder()
+                .setColor('#9932cc')
+                .setTitle('⚙️ Configuration Économie')
+                .setDescription('Configurez le système d\'économie complet avec karma\n\n**Utilisation :**\n• Utilisez les boutons ci-dessous\n• Ou `/configeconomie actions` pour accéder directement à une section')
+                .addFields(
+                    {
+                        name: '💼 Actions Économiques',
+                        value: 'Gérez les actions disponibles (travail, vol, etc.)',
+                        inline: true
+                    },
+                    {
+                        name: '🛒 Boutique',
+                        value: 'Configurez les objets et récompenses à vendre',
+                        inline: true
+                    },
+                    {
+                        name: '📊 Sanctions/Récompenses Karma',
+                        value: 'Configurez les systèmes automatiques basés sur le karma',
+                        inline: true
+                    },
+                    {
+                        name: '💬 Récompenses Messages',
+                        value: 'Configurez les gains d\'argent automatiques pour les messages',
+                        inline: true
+                    }
+                )
+                .setFooter({ text: 'Sélectionnez une catégorie à configurer' });
+
+            const row = new ActionRowBuilder()
+                .addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId('economy_config_menu')
+                        .setPlaceholder('📋 Sélectionnez une section à configurer')
+                        .addOptions([
+                            {
+                                label: 'Actions Économiques',
+                                description: 'Gérer les actions (travail, vol, etc.)',
+                                value: 'actions',
+                                emoji: '💼'
+                            },
+                            {
+                                label: 'Boutique',
+                                description: 'Configurer la boutique et les objets',
+                                value: 'shop',
+                                emoji: '🛒'
+                            },
+                            {
+                                label: 'Système Karma',
+                                description: 'Sanctions et récompenses automatiques',
+                                value: 'karma',
+                                emoji: '📊'
+                            },
+                            {
+                                label: 'Configuration Daily',
+                                description: 'Récompense quotidienne des utilisateurs',
+                                value: 'daily',
+                                emoji: '🎁'
+                            },
+                            {
+                                label: 'Récompenses Messages',
+                                description: 'Gains automatiques pour chaque message',
+                                value: 'messages',
+                                emoji: '💬'
+                            }
+                        ])
+                );
+
+            await this.respondToInteraction(interaction, {
+                embeds: [embed],
+                components: [row]
+            });
+        } catch (error) {
+            console.error('Erreur showMainEconomyConfig:', error);
+        }
+    },
+
+    async showActionsConfig(interaction) {
+        try {
+            const guildId = interaction.guild.id;
+            const actionsPath = path.join('./data', 'actions.json');
+            
+            let actionsData = {};
+            if (fs.existsSync(actionsPath)) {
+                actionsData = JSON.parse(fs.readFileSync(actionsPath, 'utf8'));
+            }
+
+            // Filtrer les actions pour ce serveur
+            const guildActions = Object.values(actionsData).filter(action => action.guildId === guildId);
+
+            let actionsText = '';
+            guildActions.forEach(action => {
+                const typeEmoji = action.actionType === 'good' ? '😇' : '😈';
+                const statusEmoji = action.enabled !== false ? '🟢' : '🔴';
+                actionsText += `${statusEmoji} ${typeEmoji} **${action.name}** - ${action.baseReward}€ (${Math.floor(action.cooldown/60)}min)\n`;
+            });
+
+            const embed = new EmbedBuilder()
+                .setColor('#9932cc')
+                .setTitle('💼 Gestion des Actions Économiques')
+                .setDescription('Actions économiques disponibles sur ce serveur :')
+                .addFields({
+                    name: 'Actions Configurées',
+                    value: actionsText || 'Aucune action configurée',
+                    inline: false
+                })
+                .setFooter({ text: 'Sélectionnez une action à configurer ou naviguez' });
+
+            const components = [this.getNavigationMenu()];
+
+            // Ajouter le sélecteur d'actions si des actions existent
+            if (guildActions.length > 0) {
+                const actionSelector = new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('economy_action_config')
+                            .setPlaceholder('⚙️ Configurer une action spécifique')
+                            .addOptions(
+                                guildActions.map(action => ({
+                                    label: action.name,
+                                    description: `${action.actionType === 'good' ? 'Bonne' : 'Mauvaise'} action - ${action.baseReward}€`,
+                                    value: action.id,
+                                    emoji: action.actionType === 'good' ? '😇' : '😈'
+                                }))
+                            )
+                    );
+                components.push(actionSelector);
+            }
+
+            await this.respondToInteraction(interaction, {
+                embeds: [embed],
+                components: components
+            });
+        } catch (error) {
+            console.error('Erreur showActionsConfig:', error);
+        }
+    },
+
+    async showShopConfig(interaction) {
+        try {
+            const guildId = interaction.guild.id;
+            const shopPath = path.join('./data', 'shop.json');
+            let shopData = {};
+            
+            if (fs.existsSync(shopPath)) {
+                shopData = JSON.parse(fs.readFileSync(shopPath, 'utf8'));
+            }
+
+            const shopItems = shopData[guildId] || [];
+
+            const embed = new EmbedBuilder()
+                .setTitle('🛒 Configuration de la Boutique')
+                .setDescription(`**${shopItems.length} objets** configurés dans la boutique\n\nTypes d'objets disponibles :\n🏆 **Objets virtuels** - Items personnalisés\n👤 **Rôles temporaires** - Rôles avec durée\n⭐ **Rôles permanents** - Rôles définitifs`)
+                .setColor('#00AAFF');
+
+            if (shopItems.length > 0) {
+                const itemList = shopItems.slice(0, 10).map(item => {
+                    let typeIcon = '🏆';
+                    let typeText = '';
+                    
+                    if (item.type === 'temp_role') {
+                        typeIcon = '👤';
+                        typeText = ` (${Math.floor(item.duration/3600)}h)`;
+                    } else if (item.type === 'perm_role') {
+                        typeIcon = '⭐';
+                        typeText = ' (permanent)';
+                    }
+                    
+                    return `${typeIcon} **${item.name}** - ${item.price}€${typeText}`;
+                }).join('\n');
+                
+                embed.addFields({ name: '📦 Objets Disponibles', value: itemList });
+            }
+
+            const components = [
+                this.getNavigationMenu(),
+                new ActionRowBuilder()
+                    .addComponents(
+                        new StringSelectMenuBuilder()
+                            .setCustomId('economy_shop_actions')
+                            .setPlaceholder('🛒 Gérer la boutique')
+                            .addOptions([
+                                {
+                                    label: 'Ajouter un Objet',
+                                    description: 'Créer un nouvel objet, rôle temporaire ou permanent',
+                                    value: 'add',
+                                    emoji: '➕'
+                                },
+                                {
+                                    label: 'Liste Complète',
+                                    description: 'Voir tous les objets de la boutique',
+                                    value: 'list',
+                                    emoji: '📋'
+                                },
+                                {
+                                    label: 'Supprimer un Objet',
+                                    description: 'Retirer un objet existant de la boutique',
+                                    value: 'remove',
+                                    emoji: '❌'
+     
