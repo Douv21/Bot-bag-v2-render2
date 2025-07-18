@@ -65,6 +65,7 @@ for (const file of commandFiles) {
         if ('data' in command && 'execute' in command) {
             client.commands.set(command.data.name, command);
             commands.push(command.data.toJSON());
+            console.log(`✅ Loaded command: ${command.data.name}`);
         } else {
             console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
         }
@@ -189,7 +190,17 @@ client.once('ready', async () => {
     // Start keep-alive server
     startKeepAlive();
     
-    console.log('🤖 Bot fully initialized and ready for production on Render.com');
+    // Liste des commandes chargées avec leurs handlers
+    console.log('\n📋 Commandes chargées et leurs handlers:');
+    client.commands.forEach((cmd, name) => {
+        const handlers = [];
+        if (cmd.handleButtonInteraction) handlers.push('Button');
+        if (cmd.handleSelectMenuInteraction) handlers.push('SelectMenu');
+        if (cmd.handleModalSubmit) handlers.push('Modal');
+        console.log(`- ${name}: ${handlers.length > 0 ? handlers.join(', ') : 'Aucun handler'}`);
+    });
+    
+    console.log('\n🤖 Bot fully initialized and ready for production on Render.com');
 });
 
 // Message event
@@ -230,32 +241,98 @@ client.on('interactionCreate', async interaction => {
                 return;
             }
             
+            console.log(`🔧 Executing slash command: ${interaction.commandName} by ${interaction.user.tag}`);
             await command.execute(interaction);
+            
         } else if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
-            // Amélioration de la gestion des interactions
             const customId = interaction.customId;
             
-            // Liste des commandes possibles (ajoutez d'autres ici si nécessaire)
-            const possibleCommands = ['configeconomie', 'economy', 'moderation', 'autothread', 'confession'];
+            // Log de l'interaction reçue
+            console.log(`🔍 Interaction reçue - Type: ${interaction.constructor.name}, CustomId: "${customId}", User: ${interaction.user.tag}`);
             
-            // Trouve la commande qui correspond au début du customId
-            const command = interaction.client.commands.get(
-                possibleCommands.find(c => customId.startsWith(c))
-            );
+            // Méthode 1: Recherche par correspondance exacte du customId
+            let command = null;
+            let matchedCommandName = null;
             
-            if (interaction.isButton() && command?.handleButtonInteraction) {
-                await command.handleButtonInteraction(interaction);
-            } else if (interaction.isStringSelectMenu() && command?.handleSelectMenuInteraction) {
-                await command.handleSelectMenuInteraction(interaction);
-            } else if (interaction.isModalSubmit() && command?.handleModalSubmit) {
-                await command.handleModalSubmit(interaction);
+            // D'abord, essayons de trouver une correspondance exacte
+            for (const [cmdName, cmd] of client.commands) {
+                if (customId.startsWith(cmdName)) {
+                    command = cmd;
+                    matchedCommandName = cmdName;
+                    break;
+                }
+            }
+            
+            // Si pas trouvé, essayons avec une liste de commandes spécifiques
+            if (!command) {
+                const possibleCommands = ['configeconomie', 'economy', 'moderation', 'autothread', 'confession', 'config'];
+                
+                for (const cmdName of possibleCommands) {
+                    if (customId.startsWith(cmdName)) {
+                        command = interaction.client.commands.get(cmdName);
+                        matchedCommandName = cmdName;
+                        break;
+                    }
+                }
+            }
+            
+            console.log(`🔍 Commande trouvée: ${matchedCommandName || 'AUCUNE'}`);
+            
+            if (command) {
+                try {
+                    let handlerExecuted = false;
+                    
+                    if (interaction.isButton() && command.handleButtonInteraction) {
+                        console.log(`🔘 Gestion bouton pour: ${matchedCommandName}`);
+                        await command.handleButtonInteraction(interaction);
+                        handlerExecuted = true;
+                    } else if (interaction.isStringSelectMenu() && command.handleSelectMenuInteraction) {
+                        console.log(`📋 Gestion menu déroulant pour: ${matchedCommandName}`);
+                        await command.handleSelectMenuInteraction(interaction);
+                        handlerExecuted = true;
+                    } else if (interaction.isModalSubmit() && command.handleModalSubmit) {
+                        console.log(`📝 Gestion modale pour: ${matchedCommandName}`);
+                        await command.handleModalSubmit(interaction);
+                        handlerExecuted = true;
+                    }
+                    
+                    if (!handlerExecuted) {
+                        console.warn(`⚠️ Commande "${matchedCommandName}" trouvée mais pas de handler approprié pour le type d'interaction`);
+                        console.warn(`- Type d'interaction: ${interaction.constructor.name}`);
+                        console.warn(`- handleButtonInteraction: ${!!command.handleButtonInteraction}`);
+                        console.warn(`- handleSelectMenuInteraction: ${!!command.handleSelectMenuInteraction}`);
+                        console.warn(`- handleModalSubmit: ${!!command.handleModalSubmit}`);
+                        
+                        if (!interaction.replied && !interaction.deferred) {
+                            await interaction.reply({ 
+                                content: 'Cette interaction n\'est pas prise en charge par cette commande.', 
+                                ephemeral: true 
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error(`❌ Erreur lors de la gestion de l'interaction ${customId}:`, error);
+                    
+                    if (!interaction.replied && !interaction.deferred) {
+                        await interaction.reply({ 
+                            content: 'Une erreur est survenue lors du traitement de cette interaction.', 
+                            ephemeral: true 
+                        });
+                    } else {
+                        await interaction.followUp({ 
+                            content: 'Une erreur est survenue lors du traitement de cette interaction.', 
+                            ephemeral: true 
+                        });
+                    }
+                }
             } else {
-                console.warn(`Aucun handler pour l'interaction avec customId: ${customId}`);
+                console.warn(`⚠️ Aucune commande trouvée pour le customId: "${customId}"`);
+                console.warn(`📋 Commandes disponibles: ${Array.from(client.commands.keys()).join(', ')}`);
                 
                 // Réponse optionnelle à l'utilisateur pour éviter les timeouts
                 if (!interaction.replied && !interaction.deferred) {
                     await interaction.reply({ 
-                        content: 'Cette interaction n\'est pas reconnue.', 
+                        content: 'Cette interaction n\'est pas reconnue. Veuillez réessayer ou contacter un administrateur si le problème persiste.', 
                         ephemeral: true 
                     });
                 }
@@ -264,10 +341,20 @@ client.on('interactionCreate', async interaction => {
     } catch (error) {
         console.error('Error handling interaction:', error);
         
-        if (interaction.deferred || interaction.replied) {
-            await interaction.followUp({ content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true });
-        } else {
-            await interaction.reply({ content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true });
+        try {
+            if (interaction.deferred || interaction.replied) {
+                await interaction.followUp({ 
+                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.', 
+                    ephemeral: true 
+                });
+            } else {
+                await interaction.reply({ 
+                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.', 
+                    ephemeral: true 
+                });
+            }
+        } catch (followUpError) {
+            console.error('Error sending error message:', followUpError);
         }
     }
 });
