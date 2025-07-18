@@ -232,15 +232,33 @@ client.on('interactionCreate', async interaction => {
             
             await command.execute(interaction);
         } else if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
-            // Handle button, select menu, and modal interactions
-            const command = interaction.client.commands.get(interaction.customId.split('_')[0]);
+            // Amélioration de la gestion des interactions
+            const customId = interaction.customId;
             
-            if (command && command.handleButtonInteraction) {
+            // Liste des commandes possibles (ajoutez d'autres ici si nécessaire)
+            const possibleCommands = ['configeconomie', 'economy', 'moderation', 'autothread', 'confession'];
+            
+            // Trouve la commande qui correspond au début du customId
+            const command = interaction.client.commands.get(
+                possibleCommands.find(c => customId.startsWith(c))
+            );
+            
+            if (interaction.isButton() && command?.handleButtonInteraction) {
                 await command.handleButtonInteraction(interaction);
-            } else if (command && command.handleSelectMenuInteraction) {
+            } else if (interaction.isStringSelectMenu() && command?.handleSelectMenuInteraction) {
                 await command.handleSelectMenuInteraction(interaction);
-            } else if (command && command.handleModalSubmit) {
+            } else if (interaction.isModalSubmit() && command?.handleModalSubmit) {
                 await command.handleModalSubmit(interaction);
+            } else {
+                console.warn(`Aucun handler pour l'interaction avec customId: ${customId}`);
+                
+                // Réponse optionnelle à l'utilisateur pour éviter les timeouts
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ 
+                        content: 'Cette interaction n\'est pas reconnue.', 
+                        ephemeral: true 
+                    });
+                }
             }
         }
     } catch (error) {
