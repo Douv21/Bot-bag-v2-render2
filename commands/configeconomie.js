@@ -1,3 +1,4 @@
+module.exports.commandName = 'configeconomie';
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, RoleSelectMenuBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, PermissionFlagsBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
