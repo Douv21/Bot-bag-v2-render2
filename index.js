@@ -14,7 +14,7 @@ const isRenderEnvironment = process.env.RENDER || false;
 function startKeepAlive() {
     const express = require('express');
     const app = express();
-    
+
     // Health check endpoint requis par Render
     app.get('/', (req, res) => {
         res.json({
@@ -25,7 +25,7 @@ function startKeepAlive() {
             environment: 'render'
         });
     });
-    
+
     app.get('/health', (req, res) => {
         res.json({
             status: 'healthy',
@@ -34,7 +34,7 @@ function startKeepAlive() {
             uptime: process.uptime()
         });
     });
-    
+
     app.listen(PORT, '0.0.0.0', () => {
         console.log(`🚀 Keep-alive server running on port ${PORT}`);
         console.log(`🌐 Health check available at: http://localhost:${PORT}/health`);
@@ -106,10 +106,10 @@ function createDirectories() {
 // Message reward system
 async function handleMessageReward(message) {
     if (message.author.bot) return;
-    
+
     try {
         const economyManager = require('./utils/economyManager');
-        
+
         // Configuration des récompenses par message
         let messageRewardsConfig;
         try {
@@ -121,23 +121,23 @@ async function handleMessageReward(message) {
                 cooldown: 60000 // 1 minute
             };
         }
-        
+
         if (!messageRewardsConfig.enabled) return;
-        
+
         const userId = message.author.id;
         const guildId = message.guild.id;
-        
+
         // Vérifier le cooldown
         if (economyManager.isOnCooldown(userId, 'message_reward')) {
             return;
         }
-        
+
         // Ajouter l'argent
         await economyManager.addMoney(userId, guildId, messageRewardsConfig.amount);
-        
+
         // Définir le cooldown
         economyManager.setCooldown(userId, 'message_reward', messageRewardsConfig.cooldown);
-        
+
         console.log(`💰 ${message.author.tag} earned ${messageRewardsConfig.amount} coins for sending a message`);
     } catch (error) {
         console.error('Error in message reward system:', error);
@@ -147,25 +147,25 @@ async function handleMessageReward(message) {
 // Auto-thread creation
 async function createAutoThread(message, globalSettings, config) {
     if (message.author.bot) return;
-    
+
     try {
         const guildAutoThreads = globalSettings[message.guild.id]?.autothread || {};
         const channelConfig = guildAutoThreads[message.channel.id];
-        
+
         if (!channelConfig || !channelConfig.enabled) return;
-        
+
         const threadName = channelConfig.threadName || `Discussion - ${new Date().toLocaleDateString('fr-FR')}`;
-        
+
         const thread = await message.startThread({
             name: threadName,
             autoArchiveDuration: channelConfig.archiveTime || 60,
             reason: 'Auto-thread créé automatiquement'
         });
-        
+
         if (channelConfig.slowMode > 0) {
             await thread.setRateLimitPerUser(channelConfig.slowMode);
         }
-        
+
         console.log(`🧵 Auto-thread créé: ${threadName} dans ${message.channel.name}`);
     } catch (error) {
         console.error('Erreur lors de la création auto-thread:', error);
@@ -176,21 +176,12 @@ async function createAutoThread(message, globalSettings, config) {
 client.once('ready', async () => {
     console.log(`✅ Ready! Logged in as ${client.user.tag}`);
     console.log(`🌐 Environment: ${isRenderEnvironment ? 'Render.com' : 'Local'}`);
-    
-    // Create necessary directories
+
     createDirectories();
-    
-    // Deploy commands
     await deployCommands();
-    
-    // Start backup system
     dataManager.startAutoBackup(15);
-    console.log('📦 Automatic backup system started');
-    
-    // Start keep-alive server
     startKeepAlive();
-    
-    // Liste des commandes chargées avec leurs handlers
+
     console.log('\n📋 Commandes chargées et leurs handlers:');
     client.commands.forEach((cmd, name) => {
         const handlers = [];
@@ -199,22 +190,17 @@ client.once('ready', async () => {
         if (cmd.handleModalSubmit) handlers.push('Modal');
         console.log(`- ${name}: ${handlers.length > 0 ? handlers.join(', ') : 'Aucun handler'}`);
     });
-    
+
     console.log('\n🤖 Bot fully initialized and ready for production on Render.com');
 });
 
-// Message event
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-    
+
     try {
-        // Handle message rewards
         await handleMessageReward(message);
-        
-        // Handle counting
         await countingManager.handleMessage(message);
-        
-        // Handle auto-thread (only for non-confession channels)
+
         if (!message.channel.name.includes('confession')) {
             let globalSettings = {};
             try {
@@ -222,7 +208,7 @@ client.on('messageCreate', async (message) => {
             } catch {
                 globalSettings = {};
             }
-            
+
             await createAutoThread(message, globalSettings, config);
         }
     } catch (error) {
@@ -230,31 +216,26 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-// Interaction event
 client.on('interactionCreate', async interaction => {
     try {
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.commands.get(interaction.commandName);
-            
+
             if (!command) {
                 console.error(`No command matching ${interaction.commandName} was found.`);
                 return;
             }
-            
+
             console.log(`🔧 Executing slash command: ${interaction.commandName} by ${interaction.user.tag}`);
             await command.execute(interaction);
-            
+
         } else if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
             const customId = interaction.customId;
-            
-            // Log de l'interaction reçue
             console.log(`🔍 Interaction reçue - Type: ${interaction.constructor.name}, CustomId: "${customId}", User: ${interaction.user.tag}`);
-            
-            // Méthode 1: Recherche par correspondance exacte du customId
+
             let command = null;
             let matchedCommandName = null;
-            
-            // D'abord, essayons de trouver une correspondance exacte
+
             for (const [cmdName, cmd] of client.commands) {
                 if (customId.startsWith(cmdName)) {
                     command = cmd;
@@ -262,11 +243,9 @@ client.on('interactionCreate', async interaction => {
                     break;
                 }
             }
-            
-            // Si pas trouvé, essayons avec une liste de commandes spécifiques
+
             if (!command) {
                 const possibleCommands = ['configeconomie', 'economy', 'moderation', 'autothread', 'confession', 'config'];
-                
                 for (const cmdName of possibleCommands) {
                     if (customId.startsWith(cmdName)) {
                         command = interaction.client.commands.get(cmdName);
@@ -275,13 +254,13 @@ client.on('interactionCreate', async interaction => {
                     }
                 }
             }
-            
+
             console.log(`🔍 Commande trouvée: ${matchedCommandName || 'AUCUNE'}`);
-            
+
             if (command) {
                 try {
                     let handlerExecuted = false;
-                    
+
                     if (interaction.isButton() && command.handleButtonInteraction) {
                         console.log(`🔘 Gestion bouton pour: ${matchedCommandName}`);
                         await command.handleButtonInteraction(interaction);
@@ -295,62 +274,52 @@ client.on('interactionCreate', async interaction => {
                         await command.handleModalSubmit(interaction);
                         handlerExecuted = true;
                     }
-                    
+
                     if (!handlerExecuted) {
                         console.warn(`⚠️ Commande "${matchedCommandName}" trouvée mais pas de handler approprié pour le type d'interaction`);
-                        console.warn(`- Type d'interaction: ${interaction.constructor.name}`);
-                        console.warn(`- handleButtonInteraction: ${!!command.handleButtonInteraction}`);
-                        console.warn(`- handleSelectMenuInteraction: ${!!command.handleSelectMenuInteraction}`);
-                        console.warn(`- handleModalSubmit: ${!!command.handleModalSubmit}`);
-                        
                         if (!interaction.replied && !interaction.deferred) {
-                            await interaction.reply({ 
-                                content: 'Cette interaction n\'est pas prise en charge par cette commande.', 
-                                ephemeral: true 
+                            await interaction.reply({
+                                content: 'Cette interaction n\'est pas prise en charge par cette commande.',
+                                ephemeral: true
                             });
                         }
                     }
                 } catch (error) {
                     console.error(`❌ Erreur lors de la gestion de l'interaction ${customId}:`, error);
-                    
                     if (!interaction.replied && !interaction.deferred) {
-                        await interaction.reply({ 
-                            content: 'Une erreur est survenue lors du traitement de cette interaction.', 
-                            ephemeral: true 
+                        await interaction.reply({
+                            content: 'Une erreur est survenue lors du traitement de cette interaction.',
+                            ephemeral: true
                         });
                     } else {
-                        await interaction.followUp({ 
-                            content: 'Une erreur est survenue lors du traitement de cette interaction.', 
-                            ephemeral: true 
+                        await interaction.followUp({
+                            content: 'Une erreur est survenue lors du traitement de cette interaction.',
+                            ephemeral: true
                         });
                     }
                 }
             } else {
                 console.warn(`⚠️ Aucune commande trouvée pour le customId: "${customId}"`);
-                console.warn(`📋 Commandes disponibles: ${Array.from(client.commands.keys()).join(', ')}`);
-                
-                // Réponse optionnelle à l'utilisateur pour éviter les timeouts
                 if (!interaction.replied && !interaction.deferred) {
-                    await interaction.reply({ 
-                        content: 'Cette interaction n\'est pas reconnue. Veuillez réessayer ou contacter un administrateur si le problème persiste.', 
-                        ephemeral: true 
+                    await interaction.reply({
+                        content: 'Cette interaction n\'est pas reconnue. Veuillez réessayer ou contacter un administrateur si le problème persiste.',
+                        ephemeral: true
                     });
                 }
             }
         }
     } catch (error) {
         console.error('Error handling interaction:', error);
-        
         try {
             if (interaction.deferred || interaction.replied) {
-                await interaction.followUp({ 
-                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.', 
-                    ephemeral: true 
+                await interaction.followUp({
+                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.',
+                    ephemeral: true
                 });
             } else {
-                await interaction.reply({ 
-                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.', 
-                    ephemeral: true 
+                await interaction.reply({
+                    content: 'Une erreur est survenue lors de l\'exécution de cette commande.',
+                    ephemeral: true
                 });
             }
         } catch (followUpError) {
@@ -382,7 +351,6 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-// Login to Discord
 if (!process.env.DISCORD_TOKEN) {
     console.error('❌ DISCORD_TOKEN environment variable is required');
     process.exit(1);
