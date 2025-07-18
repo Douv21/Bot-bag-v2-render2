@@ -1,0 +1,36 @@
+# Configuration autoscale optimisée pour Discord bot
+# À utiliser pour remplacer la section [deployment] dans .replit
+
+[deployment]
+deploymentTarget = "autoscale"
+run = "node index.js"
+ignorePorts = false
+
+[env]
+# Variables d'environnement requises (à configurer dans Replit Secrets)
+DISCORD_TOKEN = ""
+CLIENT_ID = ""
+DATABASE_URL = ""
+NODE_ENV = "production"
+
+[scaling]
+minInstances = 1
+maxInstances = 2
+autoScale = true
+
+[health]
+path = "/health"
+port = 3000
+initialDelaySeconds = 30
+periodSeconds = 10
+timeoutSeconds = 5
+failureThreshold = 3
+
+[resources]
+cpu = "0.5"
+memory = "1Gi"
+
+# Configuration recommandée pour le .replit :
+# [deployment]
+# deploymentTarget = "autoscale"
+# run = "node index.js"

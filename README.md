@@ -1,219 +1,180 @@
-# 🤖 Discord Bot Bag v2 - Système de Confessions & Économie
+# 🤖 Bag Bot v2(2) - Discord Confession Bot
 
-Un bot Discord sophistiqué offrant un système avancé de confessions anonymes et de gestion économique avec des mécaniques de karma robustes et des capacités de configuration multi-serveurs.
+[![Status](https://img.shields.io/badge/status-stable-green.svg)](https://github.com)
+[![Version](https://img.shields.io/badge/version-2.2-blue.svg)](https://github.com)
+[![Node.js](https://img.shields.io/badge/node.js-20+-brightgreen.svg)](https://nodejs.org)
+[![Discord.js](https://img.shields.io/badge/discord.js-14.21.0-blue.svg)](https://discord.js.org)
 
-## ✨ Fonctionnalités Principales
+Un bot Discord sophistiqué offrant un système avancé de confessions anonymes et de gestion économique avec des mécaniques de karma robustes et des capacités de configuration sur plusieurs serveurs.
 
-### 🔒 Système de Confessions Anonymes
-- **Confessions sécurisées** : Soumission via `/confess` avec texte et/ou images
-- **Threads automatiques** : Création auto de threads pour chaque confession
-- **Logs administrateurs** : Traçabilité complète avec identification utilisateur
-- **Rate limiting** : Protection anti-spam intégrée
+## ✨ Fonctionnalités
+
+### 🔐 Système de Confessions Anonymes
+- Confessions anonymes avec texte et/ou images
+- Auto-thread automatique configurable
+- Logs d'audit sécurisés pour modération
+- Rate limiting anti-spam intégré
 
 ### 💰 Système Économique Complet
-- **12 commandes d'économie** : Travailler, pêcher, voler, crimes, paris, donations
-- **Système de karma** : Actions bonnes (😇) vs mauvaises (😈)
-- **Boutique intégrée** : Achat de rôles Discord
-- **Daily rewards** : Récompenses quotidiennes avec streaks
-- **Leaderboards** : Classements argent et karma séparés
+- **12 commandes économiques** : travail, pêche, vol, crime, pari, don, etc.
+- **Système karma** : Actions bonnes (😇) vs mauvaises (😈)
+- **Boutique intégrée** : Achat de rôles avec l'argent virtuel
+- **Récompenses quotidiennes** avec système de streak
+- **Leaderboards** séparés pour argent et karma
 
-### 🎛️ Panel Web de Configuration
-- **Interface web** : Configuration en temps réel sur port 5000
-- **Multi-serveurs** : Gestion indépendante par serveur
-- **Statistiques** : Métriques détaillées et analytics
-- **Auto-thread global** : Système façon Needle pour tous les messages
+### ⚙️ Configuration Avancée
+- **Panel web** de configuration accessible
+- **24 commandes** Discord au total
+- **Configuration multi-serveurs** indépendante
+- **Système de staff** avec permissions granulaires
 
-### 🛡️ Monitoring Avancé
-- **5 systèmes de surveillance** : Protection 24/7
-- **Health checks** : Endpoints robustes sur ports 3000/5000
-- **Protection mobile** : Spécialement optimisé pour Android
-- **Auto-restart** : Redémarrage intelligent en cas d'erreur
+### 🛡️ Monitoring Ultra-Robuste
+- **4 couches de protection** : Android 503 Killer, Error 502 Detector, Stability Monitor, Mobile Disconnect Guard
+- **Health checks** automatiques sur ports 3000/5000
+- **Backup automatique** des données toutes les 15 minutes
+- **Protection mobile** spécialisée Android
 
 ## 🚀 Installation Rapide
 
-### Prérequis
-- Node.js 18+ 
-- PostgreSQL
-- Token Discord Bot
+### Option 1: Déploiement Replit (Recommandé)
 
-### Étape 1 : Cloner le projet
-```bash
-git clone https://github.com/VOTRE_USERNAME/discord-bot-bag-v2.git
-cd discord-bot-bag-v2
-```
+1. **Importez le projet** sur Replit
+2. **Configurez les secrets** dans l'interface Replit :
+   - `DISCORD_TOKEN` : Token de votre bot Discord
+   - `CLIENT_ID` : ID client de votre application Discord
+   - `DATABASE_URL` : URL de votre base de données PostgreSQL
+3. **Modifiez .replit** pour autoscale (voir [AUTOSCALE_DEPLOYMENT.md](AUTOSCALE_DEPLOYMENT.md))
+4. **Déployez** via l'interface Replit
 
-### Étape 2 : Installer les dépendances
+### Option 2: Installation Locale
+
 ```bash
+# Cloner le repository
+git clone https://github.com/votre-username/bag-bot-v2-2.git
+cd bag-bot-v2-2
+
+# Installer les dépendances
 npm install
+
+# Configurer l'environnement
+cp .env.example .env
+# Éditez .env avec vos tokens
+
+# Démarrer le bot
+npm start
 ```
 
-### Étape 3 : Configuration
-Créez un fichier `.env` :
-```env
-DISCORD_TOKEN=votre_token_discord
-CLIENT_ID=votre_client_id
-DATABASE_URL=postgresql://user:password@localhost/dbname
-```
+### Option 3: Docker
 
-### Étape 4 : Démarrage
 ```bash
-node index.js
+docker build -t bag-bot-v2 .
+docker run -d -p 3000:3000 -p 5000:5000 \
+  -e DISCORD_TOKEN="votre_token" \
+  -e CLIENT_ID="votre_client_id" \
+  -e DATABASE_URL="votre_db_url" \
+  bag-bot-v2
 ```
 
-## 📋 Commandes Disponibles (24 commandes)
+## 📊 Commandes Disponibles
 
-### 👤 Utilisateur
-- `/confess` - Soumettre une confession anonyme
-- `/economie` - Voir profil et statistiques
-- `/travailler` - Travailler pour gagner de l'argent (+😇)
-- `/pecher` - Pêcher avec mécaniques spéciales
-- `/voler` - Voler de l'argent à un membre (+😈)
-- `/crime` - Commettre un crime (+😈)
-- `/parier` - Parier son argent (50% chance)
-- `/donner` - Donner de l'argent (+😇)
+### 👤 Commandes Utilisateur (12)
+- `/confess` - Confession anonyme
+- `/economie` - Profil économique
+- `/travailler` - Gagner de l'argent (bonne action)
+- `/pecher` - Pêcher pour de l'argent (bonne action)
+- `/voler` - Voler de l'argent (mauvaise action)
+- `/crime` - Commettre un crime (mauvaise action)
+- `/parier` - Parier de l'argent (mauvaise action)
+- `/donner` - Donner de l'argent (bonne action)
 - `/daily` - Récompense quotidienne
-- `/boutique` - Acheter des rôles
+- `/boutique` - Magasin de rôles
 - `/topargent` - Classement richesse
 - `/karma` - Classement karma
-- `/solde` - Voir son solde
 
-### 🛠️ Administrateur
-- `/config` - Configuration serveur
-- `/autothread` - Gestion auto-threads
+### ⚙️ Commandes Configuration (8)
+- `/config` - Configuration principale
+- `/autothread` - Configuration auto-thread
 - `/configeconomie` - Configuration économie
-- `/ajoutargent` - Ajouter argent à un membre
-- `/retraitargent` - Retirer argent d'un membre
-- `/ajoutkarma` - Ajouter karma à un membre
-- `/retraitkarma` - Retirer karma d'un membre
-- `/dashboard` - Accès panel web
-- `/stats` - Statistiques détaillées
-- `/staff` - Gestion rôles staff
-- `/compter` - Configuration comptage
+- `/staff` - Gestion équipe modération
+- `/compter` - Système de comptage
+- `/dashboard` - Panel web
+- `/stats` - Statistiques bot
+- `/userinfo` - Informations utilisateur
 
-## 🔧 Déploiement
+### 👨‍💼 Commandes Admin (4)
+- `/ajoutargent` - Ajouter argent à un utilisateur
+- `/retraitargent` - Retirer argent d'un utilisateur
+- `/ajoutkarma` - Ajouter karma à un utilisateur
+- `/retraitkarma` - Retirer karma d'un utilisateur
 
-### Replit (Recommandé)
-1. Importez le projet sur Replit
-2. Configurez les variables d'environnement dans Secrets
-3. Modifiez `.replit` pour autoscale :
-```toml
-[deployment]
-deploymentTarget = "autoscale"
-run = "node index.js"
+## 🏗️ Architecture
+
+```
+bag-bot-v2-2/
+├── commands/              # 24 commandes Discord
+├── utils/                 # Utilitaires (économie, logs, rate limit)
+├── panel/                 # Interface web de configuration
+├── server/                # Configuration base de données
+├── shared/                # Schémas partagés
+├── docs/                  # Documentation
+├── monitoring/            # Systèmes de monitoring (4 couches)
+├── config.json           # Configuration principale
+├── index.js              # Point d'entrée
+└── server.js             # Serveur web
 ```
 
-### VPS/Serveur Dédié
-1. Clonez le référentiel
-2. Installez PostgreSQL
-3. Configurez `.env`
-4. Utilisez PM2 pour la production :
-```bash
-npm install -g pm2
-pm2 start index.js --name "discord-bot"
-```
+## 🔧 Configuration
+
+### Variables d'Environnement
+Consultez `.env.example` pour la liste complète des variables requises.
+
+### Base de Données
+Le bot supporte PostgreSQL avec Drizzle ORM. Configuration automatique via `DATABASE_URL`.
+
+### Health Checks
+- **Port 3000** : `/health`, `/ping`, `/status`, `/metrics`
+- **Port 5000** : Panel web de configuration
+
+## 📈 Monitoring
+
+Le bot inclut un système de monitoring ultra-robuste :
+
+- **Android 503 Killer** : Protection ultra-agressive contre les erreurs 503
+- **Error 502 Detector** : Détection proactive des erreurs 502
+- **Stability Monitor** : Vérifications toutes les 10 secondes
+- **Mobile Disconnect Guard** : Protection spécialisée mobile
+
+## 🚀 Déploiement
+
+### Replit Autoscale (Recommandé)
+Consultez [AUTOSCALE_DEPLOYMENT.md](AUTOSCALE_DEPLOYMENT.md) pour le guide complet.
 
 ### Docker
-```bash
-docker build -t discord-bot .
-docker run -d -p 3000:3000 -p 5000:5000 --env-file .env discord-bot
-```
+Consultez [DEPLOYMENT.md](DEPLOYMENT.md) pour toutes les options de déploiement.
 
-## 📊 Architecture Technique
+## 📚 Documentation
 
-### Stack Technologique
-- **Backend** : Node.js 18+
-- **Database** : PostgreSQL + JSON files
-- **Framework** : Discord.js v14
-- **Web Server** : Express.js
-- **Monitoring** : Custom stability systems
+- [Guide Installation](docs/INSTALLATION.md)
+- [Documentation Commandes](docs/COMMANDES.md)
+- [Configuration Avancée](docs/CONFIGURATION.md)
+- [Déploiement Autoscale](AUTOSCALE_DEPLOYMENT.md)
+- [Configuration GitHub](GITHUB_SETUP_V2.md)
 
-### Structure des fichiers
-```
-├── index.js                 # Point d'entrée principal
-├── commands/                # Commandes Discord (24 fichiers)
-├── utils/                   # Utilitaires et managers
-├── panel/                   # Interface web
-├── monitoring/              # Systèmes de surveillance
-├── config.json             # Configuration bot
-└── docs/                   # Documentation
-```
+## 🤝 Contribution
 
-## 🎯 Systèmes de Monitoring
-
-### Surveillance Active
-- **Stability Monitor** : Vérification santé toutes les 10s
-- **502 Error Detector** : Détection erreurs serveur
-- **Mobile Disconnect Guard** : Protection déconnexions mobiles
-- **Android 503 Killer** : Protection spéciale Android
-- **Ultra Stability Guard** : Gardien ultra-robuste
-
-### Health Endpoints
-- `GET /ping` - Ping basique
-- `GET /health` - Santé détaillée
-- `GET /status` - Statut JSON
-- `GET /metrics` - Métriques système
-
-## 📈 Performance
-
-### Métriques Typiques
-- **Uptime** : 99.9%+ avec monitoring
-- **Latence** : <50ms pour commandes
-- **Mémoire** : ~100MB base + scaling
-- **Redémarrages** : <1 par jour avec protection
-
-### Optimisations
-- Backup automatique toutes les 15min
-- Nettoyage mémoire intelligent
-- Rate limiting adaptatif
-- Compression des logs
-
-## 🔐 Sécurité
-
-### Protection Intégrée
-- Rate limiting par utilisateur
-- Validation des entrées
-- Logs audit complets
-- Isolation des données par serveur
-
-### Permissions Discord
-- Gestion des rôles
-- Lecture/écriture messages
-- Gestion des threads
-- Accès serveur uniquement
-
-## 🌍 Support Multi-Langues
-
-Actuellement en **français** avec support prévu pour :
-- Anglais
-- Espagnol
-- Allemand
-
-## 📞 Support & Contribution
-
-### Signaler un Bug
-1. Ouvrez une issue sur GitHub
-2. Décrivez le problème rencontré
-3. Joignez les logs si possible
-
-### Demander une Fonctionnalité
-1. Créez une feature request
-2. Décrivez l'usage prévu
-3. Expliquez la valeur ajoutée
-
-### Contribuer
-1. Fork le projet
-2. Créez une branche feature
-3. Commit vos changements
-4. Ouvrez une Pull Request
+Consultez [CONTRIBUTING.md](CONTRIBUTING.md) pour les guidelines de contribution.
 
 ## 📄 Licence
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+Ce projet est sous licence MIT. Voir [LICENSE](LICENSE) pour plus de détails.
 
-## 🎉 Remerciements
+## 🆘 Support
 
-Bot développé pour les communautés Discord françaises avec amour et passion pour la technologie !
+- **Documentation** : Consultez les fichiers docs/
+- **Issues** : Ouvrez une issue sur GitHub
+- **Health Check** : `/status` endpoint pour diagnostics
 
 ---
 
-**Made with ❤️ pour la communauté Discord française**
+**Bot Status**: ✅ Stable et opérationnel avec 24/7 monitoring
+**Version**: 2.2 avec autoscale et monitoring avancé

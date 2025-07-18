@@ -1,27 +1,39 @@
-# Dockerfile optimisé pour Render.com
-FROM node:18-alpine
+# Multi-stage build for Discord bot
+FROM node:20-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /app
 
-# Copier les fichiers de configuration
+# Copy package files
 COPY package*.json ./
 
-# Installer les dépendances
+# Install dependencies
 RUN npm ci --only=production
 
-# Copier le code source
+# Production stage
+FROM node:20-alpine AS production
+
+WORKDIR /app
+
+# Copy dependencies from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+
+# Copy application code
 COPY . .
 
-# Créer les dossiers nécessaires
+# Create necessary directories
 RUN mkdir -p data logs temp_cards
 
-# Exposer le port
-EXPOSE 3000
+# Set proper permissions
+RUN chown -R node:node /app
+USER node
 
-# Variables d'environnement par défaut
-ENV NODE_ENV=production
-ENV PORT=3000
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Commande de démarrage
+# Expose ports
+EXPOSE 3000 5000
+
+# Start the bot
 CMD ["node", "index.js"]

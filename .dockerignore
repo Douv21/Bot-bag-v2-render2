@@ -1,0 +1,41 @@
+# Ignore development files
+node_modules
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+
+# Ignore data directories (will be created at runtime)
+data/
+logs/
+temp_cards/
+
+# Ignore environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Ignore Replit-specific files
+.replit
+replit.nix
+
+# Ignore backup and temporary files
+*.backup
+*.tmp
+*.log
+
+# Ignore documentation
+docs/
+*.md
+!README.md
+
+# Ignore deployment artifacts
+BAG v2/
+attached_assets/
+EXPORT_*.md
+GITHUB_*.md
+PUBLICATION_*.md
+SOLUTION_*.md

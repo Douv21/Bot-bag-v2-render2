@@ -1,32 +1,29 @@
 {
-  "name": "discord-bot-bag-v2-render",
-  "version": "2.1.0",
-  "description": "Bot Discord BAG v2 - Version optimisée pour Render.com",
-  "main": "index.render.js",
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "name": "workspace",
+  "version": "1.0.0",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.render.js",
-    "dev": "node index.render.js",
-    "build": "echo 'No build step required'",
-    "test": "echo 'No tests specified'"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "@neondatabase/serverless": "^1.0.1",
     "discord.js": "^14.21.0",
-    "express": "^4.19.2",
-    "sharp": "^0.33.4",
-    "uuid": "^10.0.0",
-    "drizzle-orm": "^0.30.10",
-    "@neondatabase/serverless": "^0.9.3"
+    "drizzle-kit": "^0.31.4",
+    "drizzle-orm": "^0.44.3",
+    "express": "^5.1.0",
+    "ffmpeg-static": "^5.2.0",
+    "sharp": "^0.34.3",
+    "uuid": "^11.1.0",
+    "youtube-sr": "^4.3.12",
+    "ytdl-core": "^4.11.5"
   },
-  "keywords": [
-    "discord",
-    "bot",
-    "render",
-    "confession",
-    "economy"
-  ],
-  "author": "BAG v2 Team",
-  "license": "MIT"
+  "description": "Un bot Discord sophistiqué offrant un système avancé de confessions anonymes et de gestion économique avec des mécaniques de karma robustes et des capacités de configuration sur plusieurs serveurs.",
+  "directories": {
+    "doc": "docs"
+  }
 }

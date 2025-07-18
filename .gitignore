@@ -1,0 +1,89 @@
+# Dépendances Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Variables d'environnement et secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Données utilisateur (à ne pas partager)
+data/
+logs/
+temp_cards/
+
+# Fichiers de backup
+*.backup
+*.bak
+data/backups/
+
+# Fichiers temporaires
+*.tmp
+*.temp
+.cache/
+
+# Logs système
+*.log
+logs/
+
+# Fichiers de base de données locale
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Fichiers Replit (à exclure pour GitHub)
+.replit
+replit.nix
+
+# Fichiers de déploiement temporaires
+*.zip
+*.tar.gz
+*.rar
+
+# Assets attachés (souvent volumineux)
+attached_assets/
+
+# Fichiers de debug Node.js
+.nyc_output
+coverage/
+
+# Répertoires de distribution
+dist/
+build/
+
+# Fichiers de lock (garder package-lock.json mais exclure yarn.lock si on utilise npm)
+yarn.lock
+
+# Fichiers de configuration locale
+config.local.json
+
+# Certificats et clés
+*.pem
+*.key
+*.cert
+*.crt
+
+# Fichiers de session
+sessions/
+
+# Cache divers
+.npm
+.eslintcache
+.parcel-cache
