@@ -19,7 +19,7 @@ module.exports = {
                 if (!hasStaffPermission) {
                     await interaction.reply({
                         content: '❌ Vous n\'avez pas les permissions nécessaires pour utiliser cette commande.',
-                        flags: 64
+                        ephemeral: true
                     });
                     return;
                 }
@@ -29,7 +29,7 @@ module.exports = {
             if (interaction.channel.type !== 0) {
                 await interaction.reply({
                     content: '❌ Cette commande ne peut être utilisée que dans un canal textuel.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -48,163 +48,10 @@ module.exports = {
             }
         } catch (error) {
             console.error('Erreur commande compter:', error);
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: '❌ Une erreur est survenue lors de l\'exécution de la commande.',
-                    flags: 64
-                });
-            }
-        }
-    },
-
-    async activateChannel(interaction) {
-        try {
-            const guildId = interaction.guild.id;
-            const channelId = interaction.channel.id;
-            
-            // Ajouter le canal à la configuration
-            const config = this.getCountingConfig(guildId);
-            config.channels.push({
-                channelId: channelId,
-                nextNumber: 1,
-                lastUserId: null,
-                isActive: true,
-                mathMode: false,
-                createdAt: new Date().toISOString()
-            });
-            
-            this.saveCountingConfig(guildId, config);
-            
-            const embed = new EmbedBuilder()
-                .setColor('#00ff00')
-                .setTitle('✅ Canal Activé')
-                .setDescription(`Le système de comptage est maintenant actif dans <#${channelId}>\n\n**Règles :**\n• Comptez dans l'ordre (1, 2, 3...)\n• Une personne ne peut pas compter deux fois de suite\n• En cas d'erreur, le comptage repart à 1`)
-                .addFields([
-                    {
-                        name: '🎯 Prochain Nombre',
-                        value: '1',
-                        inline: true
-                    },
-                    {
-                        name: '🎮 Mode Mathématiques',
-                        value: 'Désactivé',
-                        inline: true
-                    }
-                ]);
-
-            await interaction.update({
-                embeds: [embed],
-                components: [
-                    new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('counting_config')
-                                .setLabel('⚙️ Configuration')
-                                .setStyle(ButtonStyle.Primary),
-                            new ButtonBuilder()
-                                .setCustomId('counting_deactivate')
-                                .setLabel('❌ Désactiver')
-                                .setStyle(ButtonStyle.Danger)
-                        )
-                ]
-            });
-        } catch (error) {
-            console.error('Erreur activateChannel:', error);
-        }
-    },
-
-    async deactivateChannel(interaction) {
-        try {
-            const guildId = interaction.guild.id;
-            const channelId = interaction.channel.id;
-            
-            // Retirer le canal de la configuration
-            const config = this.getCountingConfig(guildId);
-            config.channels = config.channels.filter(c => c.channelId !== channelId);
-            this.saveCountingConfig(guildId, config);
-            
-            const embed = new EmbedBuilder()
-                .setColor('#ff0000')
-                .setTitle('❌ Canal Désactivé')
-                .setDescription(`Le système de comptage a été désactivé dans ce canal.\n\nUtilisez le bouton ci-dessous pour le réactiver si nécessaire.`);
-
-            await interaction.update({
-                embeds: [embed],
-                components: [
-                    new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder()
-                                .setCustomId('counting_activate')
-                                .setLabel('✅ Activer le Comptage')
-                                .setStyle(ButtonStyle.Success)
-                        )
-                ]
-            });
-        } catch (error) {
-            console.error('Erreur deactivateChannel:', error);
-        }
-    },
-
-    async showActivationPrompt(interaction) {
-        try {
-            const embed = new EmbedBuilder()
-                .setColor('#ffaa00')
-                .setTitle('📊 Configuration Système de Comptage')
-                .setDescription(`Ce canal n'est pas encore configuré pour le comptage.\n\n**Le système de comptage permet :**\n• Compter ensemble de 1 à l'infini\n• Mode mathématiques avec calculs\n• Statistiques et records\n• Anti-triche automatique`)
-                .addFields([
-                    {
-                        name: '📋 Règles du Comptage',
-                        value: '• Une personne = un nombre à la fois\n• Comptage séquentiel obligatoire\n• Erreur = redémarrage à 1',
-                        inline: false
-                    }
-                ]);
-
-            const components = [
-                new ActionRowBuilder()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId('counting_activate')
-                            .setLabel('✅ Activer le Comptage')
-                            .setStyle(ButtonStyle.Success)
-                            .setEmoji('📊')
-                    )
-            ];
-
             await interaction.reply({
-                embeds: [embed],
-                components: components,
-                flags: 64
+                content: '❌ Une erreur est survenue lors de l\'exécution de la commande.',
+                ephemeral: true
             });
-        } catch (error) {
-            console.error('Erreur showActivationPrompt:', error);
-        }
-    },
-
-    getCountingConfig(guildId) {
-        try {
-            const configPath = path.join('./data', 'counting.json');
-            if (!fs.existsSync(configPath)) {
-                return { channels: [] };
-            }
-            const data = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            return data[guildId] || { channels: [] };
-        } catch (error) {
-            console.error('Erreur getCountingConfig:', error);
-            return { channels: [] };
-        }
-    },
-
-    saveCountingConfig(guildId, config) {
-        try {
-            const configPath = path.join('./data', 'counting.json');
-            let data = {};
-            if (fs.existsSync(configPath)) {
-                data = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-            }
-            data[guildId] = config;
-            fs.writeFileSync(configPath, JSON.stringify(data, null, 2));
-        } catch (error) {
-            console.error('Erreur saveCountingConfig:', error);
         }
     },
 
@@ -226,10 +73,6 @@ module.exports = {
                 await this.showChannelRemove(interaction);
             } else if (interaction.customId === 'counting_settings') {
                 await this.showCountingSettings(interaction);
-            } else if (interaction.customId === 'counting_activate') {
-                await this.activateChannel(interaction);
-            } else if (interaction.customId === 'counting_deactivate') {
-                await this.deactivateChannel(interaction);
             } else if (interaction.customId === 'counting_toggle_math') {
                 await this.toggleMathMode(interaction);
             } else if (interaction.customId === 'counting_toggle_reactions') {
@@ -341,7 +184,7 @@ module.exports = {
             if (interaction.replied || interaction.deferred) {
                 await interaction.editReply({ embeds: [embed], components });
             } else {
-                await interaction.reply({ embeds: [embed], components, flags: 64 });
+                await interaction.reply({ embeds: [embed], components, ephemeral: true });
             }
         } catch (error) {
             console.error('Erreur showMainConfig compter:', error);
@@ -406,7 +249,7 @@ module.exports = {
                 if (interaction.replied || interaction.deferred) {
                     await interaction.editReply({ embeds: [embed], components });
                 } else {
-                    await interaction.reply({ embeds: [embed], components, flags: 64 });
+                    await interaction.reply({ embeds: [embed], components, ephemeral: true });
                 }
                 return;
             }
@@ -498,7 +341,7 @@ module.exports = {
             if (interaction.replied || interaction.deferred) {
                 await interaction.editReply({ embeds: [embed], components });
             } else {
-                await interaction.reply({ embeds: [embed], components, flags: 64 });
+                await interaction.reply({ embeds: [embed], components, ephemeral: true });
             }
         } catch (error) {
             console.error('Erreur showChannelAdd compter:', error);
@@ -513,7 +356,7 @@ module.exports = {
             if (config.channels.length === 0) {
                 await interaction.reply({
                     content: '❌ Aucun canal de comptage configuré.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -543,7 +386,7 @@ module.exports = {
                 new ActionRowBuilder().addComponents(selectMenu)
             ];
 
-            await interaction.reply({ embeds: [embed], components, flags: 64 });
+            await interaction.reply({ embeds: [embed], components, ephemeral: true });
         } catch (error) {
             console.error('Erreur showChannelRemove compter:', error);
         }
@@ -601,7 +444,7 @@ module.exports = {
                     )
             ];
 
-            await interaction.reply({ embeds: [embed], components, flags: 64 });
+            await interaction.reply({ embeds: [embed], components, ephemeral: true });
         } catch (error) {
             console.error('Erreur showCountingSettings compter:', error);
         }
@@ -616,7 +459,7 @@ module.exports = {
             if (!channel) {
                 await interaction.reply({
                     content: '❌ Canal introuvable.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -625,7 +468,7 @@ module.exports = {
             if (config.channels.some(c => c.channelId === channelId)) {
                 await interaction.reply({
                     content: '❌ Ce canal est déjà configuré pour le comptage.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -642,7 +485,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Canal **${channel.name}** configuré pour le comptage !`,
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -668,7 +511,7 @@ module.exports = {
             if (channelIndex === -1) {
                 await interaction.reply({
                     content: '❌ Ce canal n\'est pas configuré pour le comptage.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -679,7 +522,7 @@ module.exports = {
             const channelName = channel ? channel.name : `Canal ${channelId.slice(-4)}`;
             await interaction.reply({
                 content: `✅ Canal **${channelName}** retiré du comptage !`,
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -705,7 +548,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Mode mathématique ${config.mathEnabled ? 'activé' : 'désactivé'} !`,
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -731,7 +574,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Réactions automatiques ${config.reactionsEnabled ? 'activées' : 'désactivées'} !`,
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -755,7 +598,7 @@ module.exports = {
             if (config.channels.length === 0) {
                 await interaction.reply({
                     content: '❌ Aucun canal de comptage configuré.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -785,7 +628,7 @@ module.exports = {
                 new ActionRowBuilder().addComponents(selectMenu)
             ];
 
-            await interaction.reply({ embeds: [embed], components, flags: 64 });
+            await interaction.reply({ embeds: [embed], components, ephemeral: true });
         } catch (error) {
             console.error('Erreur showResetSelector:', error);
         }
@@ -801,7 +644,7 @@ module.exports = {
             if (!channelConfig) {
                 await interaction.reply({
                     content: '❌ Canal de comptage introuvable.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -816,7 +659,7 @@ module.exports = {
             const channelName = channel ? channel.name : `Canal ${channelId.slice(-4)}`;
             await interaction.reply({
                 content: `✅ Canal **${channelName}** réinitialisé ! (${oldNumber} → 0)`,
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -863,7 +706,7 @@ module.exports = {
                 if (!channel) {
                     await interaction.reply({
                         content: '❌ Canal introuvable. Vérifiez l\'ID du canal.',
-                        flags: 64
+                        ephemeral: true
                     });
                     return;
                 }
@@ -871,7 +714,7 @@ module.exports = {
                 if (channel.type !== 0) {
                     await interaction.reply({
                         content: '❌ Ce canal n\'est pas un canal textuel.',
-                        flags: 64
+                        ephemeral: true
                     });
                     return;
                 }
@@ -882,7 +725,7 @@ module.exports = {
                 if (config.channels.some(c => c.channelId === channelId)) {
                     await interaction.reply({
                         content: '❌ Ce canal est déjà configuré pour le comptage.',
-                        flags: 64
+                        ephemeral: true
                     });
                     return;
                 }
@@ -917,7 +760,7 @@ module.exports = {
                 )
             ];
 
-            await interaction.reply({ embeds: [embed], components, flags: 64 });
+            await interaction.reply({ embeds: [embed], components, ephemeral: true });
         } catch (error) {
             console.error('Erreur showActivationPrompt:', error);
         }
@@ -952,7 +795,7 @@ module.exports = {
                 )
             ];
 
-            await interaction.reply({ embeds: [embed], components, flags: 64 });
+            await interaction.reply({ embeds: [embed], components, ephemeral: true });
         } catch (error) {
             console.error('Erreur showChannelStatus:', error);
         }
@@ -1004,7 +847,7 @@ module.exports = {
             // Envoyer un message public pour indiquer l'activation
             await interaction.followUp({
                 content: `🔢 **Système de comptage activé !**\n\n📋 **Comment jouer :**\n• Comptez dans l'ordre : 1, 2, 3...\n• Pas deux fois d'affilée\n• Utilisez les maths : 2+3 pour 5\n\n🎯 **Commençons ! Tapez 1**`,
-                flags: 0
+                ephemeral: false
             });
         } catch (error) {
             console.error('Erreur activateCurrentChannel:', error);
