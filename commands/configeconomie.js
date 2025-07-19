@@ -25,7 +25,7 @@ module.exports = {
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou avoir un rôle staff pour utiliser cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
 
@@ -45,7 +45,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors de l\'exécution de la commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
         }
@@ -58,7 +58,7 @@ module.exports = {
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou avoir un rôle staff pour utiliser cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
 
@@ -258,11 +258,11 @@ module.exports = {
     async safeReply(interaction, content) {
         try {
             if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({ content, ephemeral: true });
+                await interaction.reply({ content, flags: 64 });
             } else if (interaction.deferred) {
                 await interaction.editReply({ content });
             } else {
-                await interaction.followUp({ content, ephemeral: true });
+                await interaction.followUp({ content, flags: 64 });
             }
         } catch (error) {
             console.error('Erreur safeReply:', error);
@@ -274,7 +274,7 @@ module.exports = {
             if (interaction.deferred || interaction.replied) {
                 await interaction.editReply({ content });
             } else {
-                await interaction.reply({ content, ephemeral: true });
+                await interaction.reply({ content, flags: 64 });
             }
         } catch (error) {
             console.error('Erreur safeEditReply:', error);
@@ -286,7 +286,7 @@ module.exports = {
             if (interaction.deferred || interaction.replied) {
                 await interaction.editReply(options);
             } else {
-                await interaction.reply({ ...options, ephemeral: true });
+                await interaction.reply({ ...options, flags: 64 });
             }
         } catch (error) {
             console.error('Erreur respondToInteraction:', error);

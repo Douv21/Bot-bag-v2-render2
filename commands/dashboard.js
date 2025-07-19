@@ -20,7 +20,7 @@ module.exports = {
             if (!hasAdminRole && !hasModRole && !interaction.member.permissions.has(PermissionFlagsBits.Administrator) && !interaction.member.permissions.has(PermissionFlagsBits.ModerateMembers)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou modérateur pour utiliser cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
 
@@ -71,7 +71,7 @@ module.exports = {
             await interaction.reply({
                 embeds: [embed],
                 components: [row],
-                ephemeral: true
+                flags: 64
             });
 
         } catch (error) {
@@ -82,7 +82,7 @@ module.exports = {
             if (interaction.deferred) {
                 await interaction.editReply({ content: errorMessage });
             } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
+                await interaction.reply({ content: errorMessage, flags: 64 });
             }
         }
     },

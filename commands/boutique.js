@@ -13,7 +13,7 @@ module.exports = {
             console.error('Erreur commande boutique:', error);
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors de l\'affichage de la boutique.',
-                ephemeral: true
+                flags: 64
             });
         }
     },
@@ -167,7 +167,7 @@ module.exports = {
     async showShop(interaction) {
         try {
             if (!interaction.deferred && !interaction.replied) {
-                await interaction.deferReply({ ephemeral: true });
+                await interaction.deferReply({ flags: 64 });
             }
 
             const guildId = interaction.guild.id;

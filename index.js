@@ -114,7 +114,7 @@ client.on(Events.InteractionCreate, async interaction => {
                 if (!interaction.replied && !interaction.deferred) {
                     await interaction.reply({
                         content: '❌ Cette interaction n\'est pas reconnue. Veuillez réessayer.',
-                        ephemeral: true
+                        flags: 64
                     });
                 }
             }
@@ -125,7 +125,7 @@ client.on(Events.InteractionCreate, async interaction => {
             try {
                 await interaction.reply({
                     content: '❌ Une erreur est survenue lors de l\'exécution de cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             } catch (replyError) {
                 console.error('❌ Impossible de répondre à l\'interaction:', replyError);
