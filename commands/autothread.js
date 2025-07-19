@@ -31,7 +31,6 @@ module.exports = {
     async handleButtonInteraction(interaction) {
         try {
             const customId = interaction.customId;
-            // Navigation principale
             if (customId === 'autothread_back_main') {
                 await showMainAutoThread(interaction);
             }
@@ -234,7 +233,6 @@ async function showAutoThreadRemove(interaction) {
 }
 
 async function addAutoThreadChannel(interaction) {
-    // Correction : récupérer le channel ID depuis interaction.values[0]
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
     
@@ -438,4 +436,4 @@ async function updateAutoThreadSettings(interaction) {
         components: [row],
         flags: 64
     });
-    }
+        }
