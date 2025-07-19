@@ -14,7 +14,7 @@ module.exports = {
             if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
                 await interaction.reply({
                     content: '❌ Seuls les administrateurs peuvent utiliser cette commande.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -24,7 +24,7 @@ module.exports = {
             console.error('Erreur staff command:', error);
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors de l\'affichage de la configuration staff.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -118,7 +118,7 @@ module.exports = {
             const options = {
                 embeds: [embed],
                 components: components,
-                flags: 64
+                ephemeral: true
             };
 
             if (interaction.replied || interaction.deferred) {
@@ -149,7 +149,7 @@ module.exports = {
             if (availableRoles.length === 0) {
                 await interaction.reply({
                     content: '❌ Aucun rôle disponible à ajouter. Tous les rôles sont déjà configurés ou gérés par des bots.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -195,7 +195,7 @@ module.exports = {
             if (staffConfig.roles.length === 0) {
                 await interaction.reply({
                     content: '❌ Aucun rôle staff configuré à retirer.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -271,7 +271,7 @@ module.exports = {
 
             await interaction.reply({
                 content: message || '❌ Aucun rôle valide sélectionné.',
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai
@@ -316,7 +316,7 @@ module.exports = {
 
             await interaction.reply({
                 content: message || '❌ Aucun rôle valide sélectionné.',
-                flags: 64
+                ephemeral: true
             });
 
             // Actualiser la configuration après un court délai

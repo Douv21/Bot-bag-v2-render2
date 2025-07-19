@@ -19,7 +19,7 @@ module.exports = {
             if (!hasAdminRole && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
                 return await interaction.reply({
                     content: '❌ Vous n\'avez pas la permission d\'utiliser cette commande.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
 
@@ -76,7 +76,7 @@ module.exports = {
 
             await interaction.reply({
                 embeds: [embed],
-                flags: 64
+                ephemeral: true
             });
 
         } catch (error) {
@@ -84,7 +84,7 @@ module.exports = {
             
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors de la récupération des statistiques.',
-                flags: 64
+                ephemeral: true
             });
         }
     }
