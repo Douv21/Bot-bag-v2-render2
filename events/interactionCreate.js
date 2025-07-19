@@ -11,56 +11,58 @@ module.exports = {
         console.error(error);
         await interaction.reply({
           content: "❌ Une erreur s'est produite lors de l'exécution de la commande.",
-          ephemeral: true,
+          flags: 64, // Réponse éphémère
         });
       }
     }
 
     if (interaction.isStringSelectMenu()) {
-      // 🎯 Menu principal de configuration
+      // 🔧 Menu principal "configmenu"
       if (interaction.customId === 'configmenu') {
-        const selected = interaction.values[0];
+        const valeur = interaction.values[0];
 
-        switch (selected) {
+        switch (valeur) {
           case 'configéconomie':
             await interaction.reply({
               content: '🪙 Tu as ouvert le menu de configuration économie.',
-              ephemeral: true,
+              flags: 64,
             });
             break;
-
           case 'configgénéral':
             await interaction.reply({
               content: '⚙️ Tu as ouvert le menu de configuration général.',
-              ephemeral: true,
+              flags: 64,
             });
             break;
-
           default:
             await interaction.reply({
               content: '❓ Option inconnue dans le menu config.',
-              ephemeral: true,
+              flags: 64,
             });
         }
       }
 
-      // 🧩 Sous-menu potentiel : configéconomie
+      // 🔧 Sous-menu "configeconomie_menu"
       if (interaction.customId === 'configeconomie_menu') {
-        const sousChoix = interaction.values[0];
+        const option = interaction.values[0];
 
-        switch (sousChoix) {
+        switch (option) {
           case 'activer':
-            await interaction.reply({ content: '💰 Économie activée !', ephemeral: true });
+            await interaction.reply({
+              content: '💰 Économie activée !',
+              flags: 64,
+            });
             break;
-
           case 'désactiver':
-            await interaction.reply({ content: '🔒 Économie désactivée.', ephemeral: true });
+            await interaction.reply({
+              content: '🔒 Économie désactivée.',
+              flags: 64,
+            });
             break;
-
           default:
             await interaction.reply({
               content: '❌ Option non reconnue dans configeconomie.',
-              ephemeral: true,
+              flags: 64,
             });
         }
       }
