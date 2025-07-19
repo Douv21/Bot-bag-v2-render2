@@ -1,38 +1,33 @@
-// 📦 Import des modules
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 require('./keep_alive.js'); // Serveur Express pour Render + UptimeRobot
 
-// 🤖 Initialisation du bot avec les intents
+// 🤖 Initialisation du client Discord
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
-    GatewayIntentBits.GuildMembers, // utile pour les événements membres
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
-// 📁 Collection des commandes Slash
+// 📁 Collection des commandes
 client.commands = new Collection();
 
-// 🔄 Chargement des commandes dans ./commands/
-const commandFolders = fs.readdirSync('./commands');
-for (const folder of commandFolders) {
-  const commandFiles = fs
-    .readdirSync(`./commands/${folder}`)
-    .filter(file => file.endsWith('.js'));
+// 🔄 Chargement des commandes dans ./commands (pas de sous-dossiers)
+const commandFiles = fs
+  .readdirSync('./commands')
+  .filter(file => file.endsWith('.js'));
 
-  for (const file of commandFiles) {
-    const filePath = path.join(__dirname, `commands/${folder}/${file}`);
-    const command = require(filePath);
-    if ('data' in command && 'execute' in command) {
-      client.commands.set(command.data.name, command);
-    } else {
-      console.warn(`[⚠️] La commande ${file} n'a pas les propriétés "data" ou "execute".`);
-    }
+for (const file of commandFiles) {
+  const command = require(`./commands/${file}`);
+  if ('data' in command && 'execute' in command) {
+    client.commands.set(command.data.name, command);
+  } else {
+    console.warn(`[⚠️] La commande ${file} est invalide (manque .data ou .execute).`);
   }
 }
 
@@ -51,5 +46,5 @@ for (const file of eventFiles) {
   }
 }
 
-// 🚀 Connexion du bot
+// 🔐 Connexion au bot via token
 client.login(process.env.TOKEN);
