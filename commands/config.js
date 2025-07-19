@@ -109,14 +109,17 @@ module.exports = {
 
         } catch (error) {
             console.error('Erreur dans la gestion de l\'interaction config:', error);
-            await interaction.reply({
-                content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
-                flags: 64
-            }).catch(() => {
-                interaction.editReply({
+            // Correction : ne répond qu'une seule fois à l'interaction
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({
+                    content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
+                    flags: 64
+                });
+            } else {
+                await interaction.editReply({
                     content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
                 }).catch(console.error);
-            });
+            }
         }
     }
 };
@@ -232,7 +235,6 @@ async function showChannelAdd(interaction) {
 }
 
 async function addChannel(interaction) {
-    // Correction : récupération du channel via values[0]
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
 
@@ -252,7 +254,6 @@ async function addChannel(interaction) {
         });
     }
 
-    // Ajouter le canal à la configuration
     config.confessionChannels.push(channel.id);
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
 
@@ -341,7 +342,6 @@ async function removeChannel(interaction) {
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
 
-    // Supprimer le canal de la configuration
     const index = config.confessionChannels.indexOf(channelId);
     if (index > -1) {
         config.confessionChannels.splice(index, 1);
@@ -403,7 +403,6 @@ async function showLogsConfig(interaction) {
 }
 
 async function setLogChannel(interaction) {
-    // Correction : récupération du channel via values[0]
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
 
@@ -415,7 +414,6 @@ async function setLogChannel(interaction) {
         });
     }
 
-    // Configurer le canal de log
     config.logChannelId = channel.id;
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
 
@@ -594,7 +592,6 @@ async function showAutoThreadRemove(interaction) {
 }
 
 async function addAutoThreadChannel(interaction) {
-    // Correction : récupération du channel via values[0]
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
 
