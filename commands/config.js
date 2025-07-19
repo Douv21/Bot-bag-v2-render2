@@ -24,9 +24,7 @@ module.exports = {
 
         } catch (error) {
             console.error('Erreur dans la commande config:', error);
-            
             const errorMessage = '❌ Une erreur s\'est produite lors de l\'ouverture de la configuration.';
-            
             if (interaction.deferred) {
                 await interaction.editReply({ content: errorMessage });
             } else {
@@ -44,7 +42,6 @@ module.exports = {
             // Menu principal
             if (customId === 'config_main') {
                 const value = interaction.values[0];
-                
                 if (value === 'channels') {
                     await showChannelsConfig(interaction);
                 } else if (value === 'logs') {
@@ -53,11 +50,9 @@ module.exports = {
                     await showAutoThreadConfig(interaction);
                 }
             }
-            
             // Actions canaux
             else if (customId === 'config_channels_action') {
                 const value = interaction.values[0];
-                
                 if (value === 'add') {
                     await showChannelAdd(interaction);
                 } else if (value === 'remove') {
@@ -66,26 +61,21 @@ module.exports = {
                     await showMainConfig(interaction);
                 }
             }
-            
             // Ajout de canal
             else if (customId === 'config_channel_add') {
                 await addChannel(interaction);
             }
-            
             // Suppression de canal
             else if (customId === 'config_channel_remove') {
                 await removeChannel(interaction);
             }
-            
             // Configuration du canal de logs
             else if (customId === 'config_log_channel') {
                 await setLogChannel(interaction);
             }
-            
             // Auto-thread actions
             else if (customId === 'config_autothread_action') {
                 const value = interaction.values[0];
-                
                 if (value === 'add') {
                     await showAutoThreadAdd(interaction);
                 } else if (value === 'remove') {
@@ -96,22 +86,18 @@ module.exports = {
                     await showMainConfig(interaction);
                 }
             }
-            
             // Auto-thread ajout de canal
             else if (customId === 'config_autothread_add') {
                 await addAutoThreadChannel(interaction);
             }
-            
             // Auto-thread suppression de canal
             else if (customId === 'config_autothread_remove') {
                 await removeAutoThreadChannel(interaction);
             }
-            
             // Auto-thread paramètres
             else if (customId === 'config_autothread_settings') {
                 await updateAutoThreadSettings(interaction);
             }
-            
             // Boutons retour
             else if (customId === 'config_back_main') {
                 await showMainConfig(interaction);
@@ -123,7 +109,6 @@ module.exports = {
 
         } catch (error) {
             console.error('Erreur dans la gestion de l\'interaction config:', error);
-            
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
                 flags: 64
@@ -247,8 +232,18 @@ async function showChannelAdd(interaction) {
 }
 
 async function addChannel(interaction) {
-    const channel = interaction.channels.first();
-    
+    // Correction : récupération du channel via values[0]
+    const channelId = interaction.values[0];
+    const channel = interaction.guild.channels.cache.get(channelId);
+
+    if (!channel) {
+        return await interaction.update({
+            content: `❌ Le canal sélectionné n'existe plus.`,
+            embeds: [],
+            components: []
+        });
+    }
+
     if (config.confessionChannels.includes(channel.id)) {
         return await interaction.update({
             content: `❌ Le canal ${channel} est déjà configuré comme canal de confession.`,
@@ -345,7 +340,7 @@ async function showChannelRemove(interaction) {
 async function removeChannel(interaction) {
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
-    
+
     // Supprimer le canal de la configuration
     const index = config.confessionChannels.indexOf(channelId);
     if (index > -1) {
@@ -408,8 +403,18 @@ async function showLogsConfig(interaction) {
 }
 
 async function setLogChannel(interaction) {
-    const channel = interaction.channels.first();
-    
+    // Correction : récupération du channel via values[0]
+    const channelId = interaction.values[0];
+    const channel = interaction.guild.channels.cache.get(channelId);
+
+    if (!channel) {
+        return await interaction.update({
+            content: `❌ Le canal sélectionné n'existe plus.`,
+            embeds: [],
+            components: []
+        });
+    }
+
     // Configurer le canal de log
     config.logChannelId = channel.id;
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
@@ -589,8 +594,18 @@ async function showAutoThreadRemove(interaction) {
 }
 
 async function addAutoThreadChannel(interaction) {
-    const channel = interaction.channels.first();
-    
+    // Correction : récupération du channel via values[0]
+    const channelId = interaction.values[0];
+    const channel = interaction.guild.channels.cache.get(channelId);
+
+    if (!channel) {
+        return await interaction.update({
+            content: `❌ Le canal sélectionné n'existe plus.`,
+            embeds: [],
+            components: []
+        });
+    }
+
     if (!config.autoThreadSettings) {
         config.autoThreadSettings = {
             enabled: true,
@@ -600,7 +615,7 @@ async function addAutoThreadChannel(interaction) {
             slowMode: 0
         };
     }
-    
+
     if (!config.autoThreadSettings.channels.includes(channel.id)) {
         config.autoThreadSettings.channels.push(channel.id);
         config.autoThreadSettings.enabled = true;
@@ -633,16 +648,16 @@ async function addAutoThreadChannel(interaction) {
 async function removeAutoThreadChannel(interaction) {
     const channelId = interaction.values[0];
     const channel = interaction.guild.channels.cache.get(channelId);
-    
+
     if (config.autoThreadSettings && config.autoThreadSettings.channels) {
         const index = config.autoThreadSettings.channels.indexOf(channelId);
         if (index > -1) {
             config.autoThreadSettings.channels.splice(index, 1);
-            
+
             if (config.autoThreadSettings.channels.length === 0) {
                 config.autoThreadSettings.enabled = false;
             }
-            
+
             fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
         }
     }
@@ -740,7 +755,7 @@ async function showAutoThreadSettings(interaction) {
 
 async function updateAutoThreadSettings(interaction) {
     const newArchiveTime = parseInt(interaction.values[0]);
-    
+
     if (!config.autoThreadSettings) {
         config.autoThreadSettings = {
             enabled: true,
@@ -750,7 +765,7 @@ async function updateAutoThreadSettings(interaction) {
             slowMode: 0
         };
     }
-    
+
     config.autoThreadSettings.archiveAfter = newArchiveTime;
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
 
