@@ -1,106 +1,105 @@
-const { SlashCommandBuilder, ChannelType } = require('discord.js');
+const {
+  SlashCommandBuilder,
+  ChannelType
+} = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('autothread')
-    .setDescription('🔄 Gère les paramètres de threads automatiques')
+    .setDescription('🔄 Gère les paramètres des threads automatiques')
     .addSubcommand(sub =>
       sub.setName('addchannel')
-        .setDescription('Ajoute un channel à la liste auto-thread')
+        .setDescription('Ajoute un salon à la liste auto-thread')
         .addChannelOption(opt =>
-          opt
-            .setName('channel')
-            .setDescription('Channel à surveiller')
+          opt.setName('channel')
+            .setDescription('Salon texte à ajouter')
             .addChannelTypes(ChannelType.GuildText)
             .setRequired(true)
         )
     )
     .addSubcommand(sub =>
       sub.setName('removechannel')
-        .setDescription('Retire un channel de la liste auto-thread')
+        .setDescription('Retire un salon de la liste auto-thread')
         .addChannelOption(opt =>
-          opt
-            .setName('channel')
-            .setDescription('Channel à retirer')
+          opt.setName('channel')
+            .setDescription('Salon à retirer')
             .addChannelTypes(ChannelType.GuildText)
             .setRequired(true)
         )
     )
     .addSubcommand(sub =>
       sub.setName('settings')
-        .setDescription('Affiche les channels configurés')
+        .setDescription('Affiche les salons configurés')
     )
     .addSubcommand(sub =>
       sub.setName('createthread')
-        .setDescription('Crée un thread manuellement dans ce salon')
+        .setDescription('Crée un thread manuellement ici')
         .addStringOption(opt =>
-          opt
-            .setName('nom')
+          opt.setName('nom')
             .setDescription('Nom du thread à créer')
             .setRequired(true)
         )
     ),
 
   async execute(interaction) {
-    const subcommand = interaction.options.getSubcommand();
+    const sub = interaction.options.getSubcommand();
+
+    // ⚠️ Remplace par ta vraie logique de stockage !
+    const guildThreads = {}; // Exemple fictif (à remplacer par DB, JSON, etc.)
     const guildId = interaction.guildId;
 
-    if (subcommand === 'addchannel') {
+    if (!guildThreads[guildId]) guildThreads[guildId] = [];
+
+    if (sub === 'addchannel') {
       const channel = interaction.options.getChannel('channel');
-
-      // 🔐 TODO: enregistrer ce channel dans ta base / config
-      // Exemple fictif : db[guildId].push(channel.id)
+      guildThreads[guildId].push(channel.id);
 
       await interaction.reply({
-        content: `✅ Le channel <#${channel.id}> a été ajouté à la liste.`,
+        content: `✅ Le salon <#${channel.id}> a été ajouté à la configuration auto-thread.`,
         flags: 64
       });
     }
 
-    if (subcommand === 'removechannel') {
+    if (sub === 'removechannel') {
       const channel = interaction.options.getChannel('channel');
-
-      // 🧹 TODO: retirer ce channel de ta config
+      guildThreads[guildId] = guildThreads[guildId].filter(id => id !== channel.id);
 
       await interaction.reply({
-        content: `❌ Le channel <#${channel.id}> a été retiré de la liste.`,
+        content: `❌ Le salon <#${channel.id}> a été retiré de la configuration auto-thread.`,
         flags: 64
       });
     }
 
-    if (subcommand === 'settings') {
-      // 📋 TODO: récupérer la liste des channels configurés
-      // Exemple fictif : const liste = db[guildId] || [];
-
-      const liste = []; // remplace par ta vraie logique
-      const description = liste.length
-        ? liste.map(id => `<#${id}>`).join('\n')
-        : '⚠️ Aucun channel configuré pour les auto-threads.';
+    if (sub === 'settings') {
+      const config = guildThreads[guildId];
+      const display = config.length > 0
+        ? config.map(id => `• <#${id}>`).join('\n')
+        : '⚠️ Aucun salon configuré. Utilise `/autothread addchannel`.';
 
       await interaction.reply({
-        content: `🛠️ Channels configurés :\n${description}`,
+        content: `📋 Salons configurés pour auto-thread :\n${display}`,
         flags: 64
       });
     }
 
-    if (subcommand === 'createthread') {
-      const threadName = interaction.options.getString('nom');
+    if (sub === 'createthread') {
+      const name = interaction.options.getString('nom');
 
       try {
         const thread = await interaction.channel.threads.create({
-          name: threadName,
+          name: name,
           autoArchiveDuration: 60,
-          reason: `Créé par /autothread createthread`,
+          reason: 'Créé via /autothread createthread'
         });
 
         await interaction.reply({
-          content: `🧵 Thread **${thread.name}** créé dans <#${interaction.channel.id}>`,
+          content: `🧵 Thread **${thread.name}** créé dans <#${interaction.channel.id}> !`,
           flags: 64
         });
-      } catch (error) {
-        console.error('Erreur création thread :', error);
+      } catch (err) {
+        console.error('Erreur lors de la création du thread :', err);
         await interaction.reply({
-          content: '❌ Impossible de créer le thread. Vérifie les permissions.',
+          content: `❌ Impossible de créer le thread. Vérifie les permissions.`,
           flags: 64
         });
       }
