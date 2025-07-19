@@ -24,7 +24,7 @@ module.exports = {
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou avoir un rôle staff pour utiliser cette commande.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
 
@@ -44,7 +44,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors de l\'exécution de la commande.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -64,7 +64,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors du traitement de l\'interaction.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -177,7 +177,7 @@ module.exports = {
                 if (!interaction.replied && !interaction.deferred) {
                     await interaction.reply({
                         content: '❌ Erreur lors du traitement de la sélection.',
-                        flags: 64
+                        ephemeral: true
                     });
                 } else if (interaction.deferred) {
                     await interaction.editReply({
@@ -231,7 +231,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors du traitement du bouton: ' + error.message,
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -573,7 +573,7 @@ module.exports = {
             if (!action) {
                 await this.respondToInteraction(interaction, {
                     content: '❌ Action non trouvée.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -713,7 +713,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors de la modification.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -781,7 +781,7 @@ module.exports = {
                 } else {
                     await interaction.reply({
                         content: '❌ Veuillez entrer un nombre valide.',
-                        flags: 64
+                        ephemeral: true
                     });
                 }
             } else if (customId.startsWith('karma_bad_modal_')) {
@@ -794,7 +794,7 @@ module.exports = {
                 } else {
                     await interaction.reply({
                         content: '❌ Veuillez entrer un nombre valide.',
-                        flags: 64
+                        ephemeral: true
                     });
                 }
             } else if (customId.startsWith('economy_karma_create_')) {
@@ -846,7 +846,7 @@ module.exports = {
             if (isNaN(newReward)) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer un nombre valide.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -866,7 +866,7 @@ module.exports = {
 
                 await interaction.reply({
                     content: `✅ Gain de **${actionsData[actionKey].name}** modifié à **${newReward}€**.`,
-                    flags: 64
+                    ephemeral: true
                 });
 
                 // Rafraîchir l'affichage
@@ -884,7 +884,7 @@ module.exports = {
             if (isNaN(newCooldown) || newCooldown < 0) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer un nombre de minutes valide.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -904,7 +904,7 @@ module.exports = {
 
                 await interaction.reply({
                     content: `✅ Cooldown de **${actionsData[actionKey].name}** modifié à **${Math.floor(newCooldown/60)}** minutes.`,
-                    flags: 64
+                    ephemeral: true
                 });
 
                 // Rafraîchir l'affichage
@@ -1017,7 +1017,7 @@ module.exports = {
             await interaction.reply({
                 embeds: [embed],
                 components: components,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur showKarmaGoodSelector:', error);
@@ -1124,7 +1124,7 @@ module.exports = {
             await interaction.reply({
                 embeds: [embed],
                 components: components,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur showKarmaBadSelector:', error);
@@ -1138,7 +1138,7 @@ module.exports = {
             if (isNaN(newKarmaGood)) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer un nombre valide.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1159,18 +1159,18 @@ module.exports = {
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp({
                         content: `✅ Karma bon de **${actionsData[actionKey].name}** modifié à **${newKarmaGood}**.`,
-                        flags: 64
+                        ephemeral: true
                     });
                 } else {
                     await interaction.reply({
                         content: `✅ Karma bon de **${actionsData[actionKey].name}** modifié à **${newKarmaGood}**.`,
-                        flags: 64
+                        ephemeral: true
                     });
                 }
             } else {
                 await interaction.reply({
                     content: '❌ Action non trouvée.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         } catch (error) {
@@ -1178,7 +1178,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Une erreur s\'est produite lors de la modification du karma.',
-                    flags: 64
+                    ephemeral: true
                 }).catch(() => {});
             }
         }
@@ -1191,7 +1191,7 @@ module.exports = {
             if (isNaN(newKarmaBad)) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer un nombre valide.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1212,18 +1212,18 @@ module.exports = {
                 if (interaction.replied || interaction.deferred) {
                     await interaction.followUp({
                         content: `✅ Karma mauvais de **${actionsData[actionKey].name}** modifié à **${newKarmaBad}**.`,
-                        flags: 64
+                        ephemeral: true
                     });
                 } else {
                     await interaction.reply({
                         content: `✅ Karma mauvais de **${actionsData[actionKey].name}** modifié à **${newKarmaBad}**.`,
-                        flags: 64
+                        ephemeral: true
                     });
                 }
             } else {
                 await interaction.reply({
                     content: '❌ Action non trouvée.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         } catch (error) {
@@ -1231,7 +1231,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Une erreur s\'est produite lors de la modification du karma.',
-                    flags: 64
+                    ephemeral: true
                 }).catch(() => {});
             }
         }
@@ -1460,7 +1460,7 @@ module.exports = {
             if (roles.length === 0) {
                 await this.respondToInteraction(interaction, {
                     content: '❌ Aucun rôle disponible sur ce serveur.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1509,7 +1509,7 @@ module.exports = {
             if (shopItems.length === 0) {
                 await this.respondToInteraction(interaction, {
                     content: '❌ Aucun objet configuré dans la boutique. Configurez d\'abord des objets dans la section Boutique.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1872,7 +1872,7 @@ module.exports = {
             if (shopItems.length === 0) {
                 await this.respondToInteraction(interaction, {
                     content: '❌ Aucun objet à supprimer dans la boutique.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1934,7 +1934,7 @@ module.exports = {
             if (itemIndex === -1) {
                 await this.respondToInteraction(interaction, {
                     content: '❌ Objet non trouvé.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -1946,13 +1946,13 @@ module.exports = {
 
             await this.respondToInteraction(interaction, {
                 content: `✅ Objet **${removedItem.name}** supprimé de la boutique.`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur removeShopItem:', error);
             await this.respondToInteraction(interaction, {
                 content: '❌ Erreur lors de la suppression.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -1972,7 +1972,7 @@ module.exports = {
             if (isNaN(karmaThreshold) || isNaN(amount)) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer des nombres valides.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2018,14 +2018,14 @@ module.exports = {
             await interaction.reply({
                 content: `✅ Règle ${type === 'rewards' ? 'de récompense' : 'de sanction'} ${period === 'daily' ? 'quotidienne' : 'hebdomadaire'} ajoutée avec succès!\n` +
                          `Karma ${karmaThreshold > 0 ? '+' : ''}${karmaThreshold} → ${amount}€`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur addKarmaRule:', error);
             if (!interaction.replied) {
                 await interaction.reply({
                     content: '❌ Erreur lors de l\'ajout de la règle.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -2036,7 +2036,7 @@ module.exports = {
             if (isNaN(ruleData.karmaThreshold)) {
                 await interaction.reply({
                     content: '❌ Veuillez entrer un seuil de karma valide.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2092,14 +2092,14 @@ module.exports = {
             await interaction.reply({
                 content: `✅ Règle ${type === 'rewards' ? 'de récompense' : 'de sanction'} ${period === 'daily' ? 'quotidienne' : 'hebdomadaire'} ajoutée!\n` +
                          `Karma ${ruleData.karmaThreshold > 0 ? '+' : ''}${ruleData.karmaThreshold} → ${description}`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur addAdvancedKarmaRule:', error);
             if (!interaction.replied) {
                 await interaction.reply({
                     content: '❌ Erreur lors de l\'ajout de la règle.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -2110,8 +2110,8 @@ module.exports = {
             console.log('Responding to interaction:', interaction.type, 'replied:', interaction.replied, 'deferred:', interaction.deferred);
             
             // Forcer toutes les réponses à être éphémères pour les commandes de config
-            if (!options.flags && interaction.isCommand()) {
-                options.flags: 64;
+            if (!options.ephemeral && interaction.isCommand()) {
+                options.ephemeral = true;
             }
             
             if (interaction.replied || interaction.deferred) {
@@ -2134,7 +2134,7 @@ module.exports = {
                 try {
                     await interaction.reply({
                         content: '❌ Erreur lors de la réponse à l\'interaction.',
-                        flags: 64
+                        ephemeral: true
                     });
                 } catch (e) {
                     console.error('Impossible de répondre à l\'interaction:', e);
@@ -2153,7 +2153,7 @@ module.exports = {
             if (isNaN(price) || price <= 0) {
                 await interaction.reply({
                     content: '❌ Le prix doit être un nombre positif.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2188,14 +2188,14 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Objet **${name}** ajouté à la boutique pour ${price}€`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur createShopItem:', error);
             if (!interaction.replied) {
                 await interaction.reply({
                     content: '❌ Erreur lors de la création de l\'objet.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -2221,7 +2221,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: '❌ Erreur lors du traitement du formulaire.',
-                    flags: 64
+                    ephemeral: true
                 });
             }
         }
@@ -2255,7 +2255,7 @@ module.exports = {
             if (isNaN(newAmount) || newAmount < 1) {
                 await interaction.reply({
                     content: '❌ Montant invalide. Veuillez entrer un nombre positif.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2276,7 +2276,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Montant daily mis à jour : **${newAmount}€** par jour`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur updateDailyAmount:', error);
@@ -2302,13 +2302,13 @@ module.exports = {
 
             await this.respondToInteraction(interaction, {
                 content: `✅ Daily ${dailyConfig[guildId].enabled ? '🟢 activé' : '🔴 désactivé'}`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur toggleDaily:', error);
             await this.respondToInteraction(interaction, {
                 content: '❌ Erreur lors de la modification du daily.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -2477,13 +2477,13 @@ module.exports = {
 
             await this.respondToInteraction(interaction, {
                 content: `✅ Récompenses messages ${messageConfig[guildId].enabled ? '🟢 activées' : '🔴 désactivées'}`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur toggleMessageRewards:', error);
             await this.respondToInteraction(interaction, {
                 content: '❌ Erreur lors de la modification des récompenses.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -2511,7 +2511,7 @@ module.exports = {
             console.error('Erreur showMessageAmountModal:', error);
             await this.respondToInteraction(interaction, {
                 content: '❌ Erreur lors de l\'ouverture du modal.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -2539,7 +2539,7 @@ module.exports = {
             console.error('Erreur showMessageCooldownModal:', error);
             await this.respondToInteraction(interaction, {
                 content: '❌ Erreur lors de l\'ouverture du modal.',
-                flags: 64
+                ephemeral: true
             });
         }
     },
@@ -2551,7 +2551,7 @@ module.exports = {
             if (isNaN(newAmount) || newAmount < 0) {
                 await interaction.reply({
                     content: '❌ Le montant doit être un nombre positif ou zéro.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2573,7 +2573,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Montant par message mis à jour : **${newAmount}€**`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur updateMessageAmount:', error);
@@ -2587,7 +2587,7 @@ module.exports = {
             if (isNaN(newCooldown) || newCooldown < 0) {
                 await interaction.reply({
                     content: '❌ Le cooldown doit être un nombre positif ou zéro (en secondes).',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2609,7 +2609,7 @@ module.exports = {
 
             await interaction.reply({
                 content: `✅ Cooldown messages mis à jour : **${newCooldown}** seconde(s)`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur updateMessageCooldown:', error);
@@ -2638,7 +2638,7 @@ module.exports = {
                 if (isNaN(duration) || duration <= 0) {
                     await interaction.reply({
                         content: '❌ La durée doit être un nombre positif d\'heures.',
-                        flags: 64
+                        ephemeral: true
                     });
                     return;
                 }
@@ -2647,7 +2647,7 @@ module.exports = {
             if (isNaN(price) || price <= 0) {
                 await interaction.reply({
                     content: '❌ Le prix doit être un nombre positif.',
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2658,7 +2658,7 @@ module.exports = {
                 console.error('Role not found in cache. Available roles:', Array.from(interaction.guild.roles.cache.keys()));
                 await interaction.reply({
                     content: `❌ Rôle introuvable (ID: ${roleId}). Vérifiez que le rôle existe toujours.`,
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2684,7 +2684,7 @@ module.exports = {
             if (existingRole) {
                 await interaction.reply({
                     content: `❌ Le rôle **${role.name}** est déjà dans la boutique.`,
-                    flags: 64
+                    ephemeral: true
                 });
                 return;
             }
@@ -2713,7 +2713,7 @@ module.exports = {
             
             await interaction.reply({
                 content: `✅ Rôle **${role.name}** ajouté à la boutique pour ${price}€${durationText}`,
-                flags: 64
+                ephemeral: true
             });
         } catch (error) {
             console.error('Erreur createShopRole:', error);
