@@ -1,45 +1,69 @@
 module.exports = {
   name: 'interactionCreate',
   async execute(interaction, client) {
-    // Gère boutons, menus string, menus channel
-    if (
-      !interaction.isButton() &&
-      !interaction.isStringSelectMenu() &&
-      !interaction.isChannelSelectMenu()
-    ) return;
+    if (interaction.isChatInputCommand()) {
+      const command = client.commands.get(interaction.commandName);
+      if (!command) return;
 
-    // Conventions : customId = <commande>_<action>
-    const [command] = interaction.customId.split('_');
-
-    try {
-      // Convention : dossier /commands/<command>.js
-      // Pour la structure modulaire, adapte le chemin ici si besoin
-      const handlerPath = `../commands/${command}.js`;
-      const handler = require(handlerPath);
-
-      if (interaction.isButton()) {
-        if (handler.handleButtonInteraction) {
-          await handler.handleButtonInteraction(interaction, client);
-        } else if (handler.run) {
-          await handler.run(interaction, client);
-        }
-      }
-
-      if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
-        if (handler.handleSelectMenuInteraction) {
-          await handler.handleSelectMenuInteraction(interaction, client);
-        } else if (handler.run) {
-          await handler.run(interaction, client);
-        }
-      }
-
-    } catch (error) {
-      console.error(`❌ Erreur dans l'interaction ${interaction.customId}:`, error);
-      if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ content: '❌ Une erreur est survenue lors de l\'interaction.', ephemeral: true });
-      } else {
-        await interaction.editReply({ content: '❌ Une erreur est survenue lors de l\'interaction.' });
+      try {
+        await command.execute(interaction, client);
+      } catch (error) {
+        console.error(error);
+        await interaction.reply({
+          content: "❌ Une erreur s'est produite lors de l'exécution de la commande.",
+          ephemeral: true,
+        });
       }
     }
-  }
+
+    if (interaction.isStringSelectMenu()) {
+      // 🎯 Menu principal de configuration
+      if (interaction.customId === 'configmenu') {
+        const selected = interaction.values[0];
+
+        switch (selected) {
+          case 'configéconomie':
+            await interaction.reply({
+              content: '🪙 Tu as ouvert le menu de configuration économie.',
+              ephemeral: true,
+            });
+            break;
+
+          case 'configgénéral':
+            await interaction.reply({
+              content: '⚙️ Tu as ouvert le menu de configuration général.',
+              ephemeral: true,
+            });
+            break;
+
+          default:
+            await interaction.reply({
+              content: '❓ Option inconnue dans le menu config.',
+              ephemeral: true,
+            });
+        }
+      }
+
+      // 🧩 Sous-menu potentiel : configéconomie
+      if (interaction.customId === 'configeconomie_menu') {
+        const sousChoix = interaction.values[0];
+
+        switch (sousChoix) {
+          case 'activer':
+            await interaction.reply({ content: '💰 Économie activée !', ephemeral: true });
+            break;
+
+          case 'désactiver':
+            await interaction.reply({ content: '🔒 Économie désactivée.', ephemeral: true });
+            break;
+
+          default:
+            await interaction.reply({
+              content: '❌ Option non reconnue dans configeconomie.',
+              ephemeral: true,
+            });
+        }
+      }
+    }
+  },
 };
