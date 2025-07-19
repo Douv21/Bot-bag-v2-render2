@@ -1,0 +1,24 @@
+// events/interactionCreate.js
+module.exports = {
+  name: 'interactionCreate',
+  async execute(interaction, client) {
+    if (interaction.isButton() || interaction.isStringSelectMenu()) {
+      const [command, action] = interaction.customId.split('_');
+      try {
+        const handlerPath = `../commands/${command}/${action}.js`;
+        const handler = require(handlerPath);
+        if (handler && typeof handler.run === 'function') {
+          await handler.run(interaction, client);
+        } else {
+          console.warn(`Handler ${handlerPath} doesn't export 'run'`);
+        }
+      } catch (err) {
+        console.error(`Erreur interaction ${interaction.customId} :`, err);
+        interaction.reply({
+          content: '❌ Une erreur est survenue avec cette interaction.',
+          ephemeral: true,
+        });
+      }
+    }
+  },
+};
