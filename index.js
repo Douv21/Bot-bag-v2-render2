@@ -1,50 +1,59 @@
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => {
-  res.send('Bot is alive!');
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ Serveur web démarré sur le port ${PORT}`);
-});
-
-// Discord bot setup
-require('dotenv').config();
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const express = require('express');
+require('dotenv').config();
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
 client.commands = new Collection();
 
-// Command loader
-const commandsPath = path.join(__dirname, 'commands');
-for (const folder of fs.readdirSync(commandsPath)) {
-  const folderPath = path.join(commandsPath, folder);
-  for (const file of fs.readdirSync(folderPath)) {
-    const filePath = path.join(folderPath, file);
-    const command = require(filePath);
-    if ('data' in command && 'execute' in command) {
-      client.commands.set(command.data.name, command);
+// Charger les commandes à la racine du dossier /commands
+const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+for (const file of commandFiles) {
+    const command = require(`./commands/${file}`);
+    if (command.data && command.execute) {
+        client.commands.set(command.data.name, command);
+    } else {
+        console.warn(`[⚠️] La commande ${file} est invalide.`);
     }
-  }
 }
 
-// Event loader
-const eventsPath = path.join(__dirname, 'events');
-for (const file of fs.readdirSync(eventsPath)) {
-  const filePath = path.join(eventsPath, file);
-  const event = require(filePath);
-  if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, client));
-  } else {
-    client.on(event.name, (...args) => event.execute(...args, client));
-  }
+// Charger les commandes dans les sous-dossiers de /commands
+const commandFolders = fs.readdirSync('./commands').filter(f => fs.lstatSync(`./commands/${f}`).isDirectory());
+for (const folder of commandFolders) {
+    const subCommandFiles = fs.readdirSync(`./commands/${folder}`).filter(file => file.endsWith('.js'));
+    for (const file of subCommandFiles) {
+        const command = require(`./commands/${folder}/${file}`);
+        if (command.data && command.execute) {
+            client.commands.set(command.data.name, command);
+        } else {
+            console.warn(`[⚠️] La commande ${folder}/${file} est invalide.`);
+        }
+    }
 }
+
+// InteractionCreate handler
+const interactionHandler = require('./events/interactionCreate');
+client.on('interactionCreate', async interaction => {
+    try {
+        await interactionHandler(interaction, client);
+    } catch (error) {
+        console.error('Erreur dans interactionCreate:', error);
+    }
+});
+
+// Démarrer le serveur Express pour Render (garder vivant)
+const app = express();
+app.get('/', (req, res) => res.send('Bot en ligne !'));
+app.listen(process.env.PORT || 3000, () => {
+    console.log('Serveur web lancé.');
+});
+
+client.once('ready', () => {
+    console.log(`✅ Connecté en tant que ${client.user.tag}`);
+});
 
 client.login(process.env.TOKEN);
