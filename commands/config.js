@@ -16,7 +16,7 @@ module.exports = {
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou avoir un rôle staff pour utiliser cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
 
@@ -126,7 +126,7 @@ module.exports = {
             
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
-                ephemeral: true
+                flags: 64
             }).catch(() => {
                 interaction.editReply({
                     content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
@@ -187,7 +187,7 @@ async function showMainConfig(interaction) {
     await interaction[method]({
         embeds: [embed],
         components: [row],
-        ephemeral: true
+        flags: 64
     });
 }
 
