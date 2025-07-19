@@ -99,6 +99,7 @@ client.once('ready', () => {
     console.log(`✅ Bot connecté en tant que ${client.user.tag}`);
     console.log(`🔗 Serveurs: ${client.guilds.cache.size}`);
     console.log(`👥 Utilisateurs: ${client.users.cache.size}`);
+    console.log(`📋 Commandes chargées: ${Array.from(client.commands.keys()).join(', ')}`);
     console.log(`🌐 Health check server running on port ${PORT}`);
     console.log(`🤖 Bot fully initialized for Render.com`);
 });
@@ -127,19 +128,38 @@ client.on(Events.InteractionCreate, async interaction => {
             const customId = interaction.customId;
             console.log(`🔘 Interaction reçue: ${customId} par ${interaction.user.tag}`);
 
-            // Extraire le nom de la commande depuis le customId
-            const [commandName] = customId.split('_');
-            const command = client.commands.get(commandName);
+            // Logique améliorée pour trouver la commande appropriée
+            let command = null;
+            let commandName = null;
+
+            // Essayer de trouver la commande en cherchant dans toutes les commandes
+            for (const [name, cmd] of client.commands) {
+                if (customId.startsWith(name + '_') || customId === name) {
+                    command = cmd;
+                    commandName = name;
+                    break;
+                }
+            }
+
+            // Si pas trouvé avec la méthode ci-dessus, essayer l'ancienne méthode
+            if (!command) {
+                const [firstPart] = customId.split('_');
+                command = client.commands.get(firstPart);
+                commandName = firstPart;
+            }
+
+            console.log(`🔍 Recherche commande pour "${customId}" -> Trouvé: ${commandName || 'AUCUNE'}`);
 
             if (command && typeof command.handleInteraction === 'function') {
-                console.log(`🔧 Traitement de l'interaction: ${customId}`);
+                console.log(`🔧 Traitement de l'interaction: ${customId} avec la commande ${commandName}`);
                 await command.handleInteraction(interaction);
             } else {
                 console.warn(`❌ Aucune commande ou handler trouvé pour: ${customId}`);
+                console.warn(`❌ Commandes disponibles:`, Array.from(client.commands.keys()));
                 
                 // Réponse d'erreur appropriée selon l'état de l'interaction
                 const errorMessage = {
-                    content: '❌ Cette interaction n\'est pas reconnue ou n\'est plus disponible.',
+                    content: `❌ Cette interaction "${customId}" n'est pas reconnue ou n'est plus disponible.\nCommandes disponibles: ${Array.from(client.commands.keys()).join(', ')}`,
                     ephemeral: true
                 };
 
