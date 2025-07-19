@@ -222,30 +222,38 @@ client.on('messageCreate', async (message) => {
 // Interaction event
 client.on('interactionCreate', async interaction => {
     try {
+client.on('interactionCreate', async interaction => {
+    try {
         if (interaction.isChatInputCommand()) {
             const command = interaction.client.commands.get(interaction.commandName);
-            
+
             if (!command) {
                 console.error(`No command matching ${interaction.commandName} was found.`);
                 return;
             }
-            
+
             await command.execute(interaction);
-        } else if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit()) {
-            // Handle button, select menu, and modal interactions
-            const command = interaction.client.commands.get(interaction.customId.split('_')[0]);
-            
-            if (command && command.handleButtonInteraction) {
+        } else if (
+            interaction.isButton() ||
+            interaction.isStringSelectMenu() ||
+            interaction.isChannelSelectMenu() ||   // <--- AJOUTER CETTE LIGNE
+            interaction.isModalSubmit()
+        ) {
+            // Handle button, select menu (string+channel), and modal interactions
+            const commandKey = interaction.customId.split('_')[0];
+            const command = interaction.client.commands.get(commandKey);
+
+            if (interaction.isButton() && command && command.handleButtonInteraction) {
                 await command.handleButtonInteraction(interaction);
-            } else if (command && command.handleSelectMenuInteraction) {
+            } else if ((interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) && command && command.handleSelectMenuInteraction) {
                 await command.handleSelectMenuInteraction(interaction);
-            } else if (command && command.handleModalSubmit) {
+            } else if (interaction.isModalSubmit() && command && command.handleModalSubmit) {
                 await command.handleModalSubmit(interaction);
             }
         }
     } catch (error) {
         console.error('Error handling interaction:', error);
-        
+
         if (interaction.deferred || interaction.replied) {
             await interaction.followUp({ content: 'Une erreur est survenue lors de l\'exécution de cette commande.', ephemeral: true });
         } else {
