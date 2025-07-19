@@ -77,7 +77,7 @@ module.exports = {
             
             console.log('Select menu interaction:', customId, 'value:', value);
             
-            if (customId === 'economy_config_menu') {
+            if (customId === 'config_menu.js') {
                 // Update interaction immédiatement avec defer pour les pages
                 await interaction.deferUpdate();
                 
