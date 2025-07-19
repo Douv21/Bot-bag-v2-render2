@@ -15,16 +15,15 @@ module.exports = {
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
                     content: '❌ Vous devez être administrateur ou avoir un rôle staff pour utiliser cette commande.',
-                    ephemeral: true
+                    flags: 64
                 });
             }
-
             await showMainAutoThread(interaction);
         } catch (error) {
             console.error('Erreur autothread execute:', error);
             await interaction.reply({
                 content: '❌ Erreur lors de l\'exécution de la commande.',
-                ephemeral: true
+                flags: 64
             });
         }
     },
@@ -32,16 +31,29 @@ module.exports = {
     async handleButtonInteraction(interaction) {
         try {
             const customId = interaction.customId;
-            
             // Navigation principale
             if (customId === 'autothread_back_main') {
                 await showMainAutoThread(interaction);
             }
-            
-            // Actions auto-thread
-            else if (customId === 'autothread_action') {
+        } catch (error) {
+            console.error('Erreur dans la gestion de l\'interaction autothread:', error);
+            await interaction.reply({
+                content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
+                flags: 64
+            }).catch(() => {
+                interaction.editReply({
+                    content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
+                }).catch(console.error);
+            });
+        }
+    },
+
+    async handleSelectMenuInteraction(interaction) {
+        try {
+            const customId = interaction.customId;
+
+            if (customId === 'autothread_action') {
                 const value = interaction.values[0];
-                
                 if (value === 'add') {
                     await showAutoThreadAdd(interaction);
                 } else if (value === 'remove') {
@@ -49,29 +61,18 @@ module.exports = {
                 } else if (value === 'settings') {
                     await showAutoThreadSettings(interaction);
                 }
-            }
-            
-            // Ajout de canal
-            else if (customId === 'autothread_add') {
+            } else if (customId === 'autothread_add') {
                 await addAutoThreadChannel(interaction);
-            }
-            
-            // Suppression de canal
-            else if (customId === 'autothread_remove') {
+            } else if (customId === 'autothread_remove') {
                 await removeAutoThreadChannel(interaction);
-            }
-            
-            // Paramètres
-            else if (customId === 'autothread_settings') {
+            } else if (customId === 'autothread_settings') {
                 await updateAutoThreadSettings(interaction);
             }
-
         } catch (error) {
-            console.error('Erreur dans la gestion de l\'interaction autothread:', error);
-            
+            console.error('Erreur dans la gestion du menu autothread:', error);
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
-                ephemeral: true
+                flags: 64
             }).catch(() => {
                 interaction.editReply({
                     content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
@@ -135,7 +136,7 @@ async function showMainAutoThread(interaction) {
     await interaction[method]({
         embeds: [embed],
         components: [row1],
-        ephemeral: method === 'reply' ? true : undefined
+        flags: 64
     });
 }
 
@@ -163,7 +164,8 @@ async function showAutoThreadAdd(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row1, row2]
+        components: [row1, row2],
+        flags: 64
     });
 }
 
@@ -186,7 +188,8 @@ async function showAutoThreadRemove(interaction) {
 
         return await interaction.update({
             embeds: [embed],
-            components: [row]
+            components: [row],
+            flags: 64
         });
     }
 
@@ -225,12 +228,15 @@ async function showAutoThreadRemove(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row1, row2]
+        components: [row1, row2],
+        flags: 64
     });
 }
 
 async function addAutoThreadChannel(interaction) {
-    const channel = interaction.channels.first();
+    // Correction : récupérer le channel ID depuis interaction.values[0]
+    const channelId = interaction.values[0];
+    const channel = interaction.guild.channels.cache.get(channelId);
     
     if (!config.globalAutoThread) {
         config.globalAutoThread = {
@@ -243,8 +249,8 @@ async function addAutoThreadChannel(interaction) {
         };
     }
     
-    if (!config.globalAutoThread.channels.includes(channel.id)) {
-        config.globalAutoThread.channels.push(channel.id);
+    if (!config.globalAutoThread.channels.includes(channelId)) {
+        config.globalAutoThread.channels.push(channelId);
         config.globalAutoThread.enabled = true;
         fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
     }
@@ -268,7 +274,8 @@ async function addAutoThreadChannel(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row]
+        components: [row],
+        flags: 64
     });
 }
 
@@ -308,7 +315,8 @@ async function removeAutoThreadChannel(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row]
+        components: [row],
+        flags: 64
     });
 }
 
@@ -377,7 +385,8 @@ async function showAutoThreadSettings(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row1, row2]
+        components: [row1, row2],
+        flags: 64
     });
 }
 
@@ -426,6 +435,7 @@ async function updateAutoThreadSettings(interaction) {
 
     await interaction.update({
         embeds: [embed],
-        components: [row]
+        components: [row],
+        flags: 64
     });
-}
+    }
