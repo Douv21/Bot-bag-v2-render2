@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, ChannelSelectMenuBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, ChannelSelectMenuBuilder, PermissionFlagsBits } = require('discord.js');
 const config = require('../config.json');
 const logger = require('../utils/logger');
 const fs = require('fs');
@@ -11,7 +11,7 @@ module.exports = {
 
     async execute(interaction) {
         try {
-            // Vérifier les permissions avec le système de rôles staff
+            // Vérifier les permissions staff
             const staffCommand = interaction.client.commands.get('staff');
             if (!staffCommand || !staffCommand.hasStaffPermission(interaction.member, interaction.guild.id)) {
                 return await interaction.reply({
@@ -19,26 +19,32 @@ module.exports = {
                     flags: 64
                 });
             }
-
             await showMainConfig(interaction);
-
         } catch (error) {
             console.error('Erreur dans la commande config:', error);
-            const errorMessage = '❌ Une erreur s\'est produite lors de l\'ouverture de la configuration.';
-            if (interaction.deferred) {
-                await interaction.editReply({ content: errorMessage });
-            } else {
-                await interaction.reply({ content: errorMessage, ephemeral: true });
-            }
+            await safeReply(interaction, '❌ Une erreur s\'est produite lors de l\'ouverture de la configuration.');
         }
     },
 
-    async handleInteraction(interaction) {
-        if (!interaction.isStringSelectMenu() && !interaction.isChannelSelectMenu() && !interaction.isButton()) return;
-
+    async handleButtonInteraction(interaction) {
         try {
             const customId = interaction.customId;
+            if (customId === 'config_back_main') {
+                await showMainConfig(interaction);
+            } else if (customId === 'config_back_channels') {
+                await showChannelsConfig(interaction);
+            } else if (customId === 'config_back_autothread') {
+                await showAutoThreadConfig(interaction);
+            }
+        } catch (error) {
+            console.error('Erreur bouton config:', error);
+            await safeReply(interaction, '❌ Une erreur s\'est produite lors du traitement de votre sélection.');
+        }
+    },
 
+    async handleSelectMenuInteraction(interaction) {
+        try {
+            const customId = interaction.customId;
             // Menu principal
             if (customId === 'config_main') {
                 const value = interaction.values[0];
@@ -61,15 +67,15 @@ module.exports = {
                     await showMainConfig(interaction);
                 }
             }
-            // Ajout de canal
+            // Ajout de canal (ChannelSelectMenu)
             else if (customId === 'config_channel_add') {
                 await addChannel(interaction);
             }
-            // Suppression de canal
+            // Suppression de canal (StringSelectMenu)
             else if (customId === 'config_channel_remove') {
                 await removeChannel(interaction);
             }
-            // Configuration du canal de logs
+            // Configuration du canal de logs (ChannelSelectMenu)
             else if (customId === 'config_log_channel') {
                 await setLogChannel(interaction);
             }
@@ -86,43 +92,33 @@ module.exports = {
                     await showMainConfig(interaction);
                 }
             }
-            // Auto-thread ajout de canal
+            // Auto-thread ajout de canal (ChannelSelectMenu)
             else if (customId === 'config_autothread_add') {
                 await addAutoThreadChannel(interaction);
             }
-            // Auto-thread suppression de canal
+            // Auto-thread suppression de canal (StringSelectMenu)
             else if (customId === 'config_autothread_remove') {
                 await removeAutoThreadChannel(interaction);
             }
-            // Auto-thread paramètres
+            // Auto-thread paramètres (StringSelectMenu)
             else if (customId === 'config_autothread_settings') {
                 await updateAutoThreadSettings(interaction);
             }
-            // Boutons retour
-            else if (customId === 'config_back_main') {
-                await showMainConfig(interaction);
-            } else if (customId === 'config_back_channels') {
-                await showChannelsConfig(interaction);
-            } else if (customId === 'config_back_autothread') {
-                await showAutoThreadConfig(interaction);
-            }
-
         } catch (error) {
-            console.error('Erreur dans la gestion de l\'interaction config:', error);
-            // Correction : ne répond qu'une seule fois à l'interaction
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
-                    flags: 64
-                });
-            } else {
-                await interaction.editReply({
-                    content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
-                }).catch(console.error);
-            }
+            console.error('Erreur menu config:', error);
+            await safeReply(interaction, '❌ Une erreur s\'est produite lors du traitement de votre sélection.');
         }
     }
 };
+
+// Sécurise la réponse à Discord (évite erreur double réponse)
+async function safeReply(interaction, content) {
+    if (!interaction.replied && !interaction.deferred) {
+        await interaction.reply({ content, flags: 64 }).catch(() => {});
+    } else {
+        await interaction.editReply({ content }).catch(() => {});
+    }
+}
 
 async function showMainConfig(interaction) {
     const stats = logger.getStatistics() || {
@@ -150,33 +146,14 @@ async function showMainConfig(interaction) {
                 .setCustomId('config_main')
                 .setPlaceholder('⚙️ Sélectionner une option...')
                 .addOptions([
-                    {
-                        label: 'Gérer les Canaux de Confession',
-                        description: 'Activer/désactiver les canaux autorisés',
-                        value: 'channels',
-                        emoji: '📝'
-                    },
-                    {
-                        label: 'Canal de Logs',
-                        description: 'Définir où envoyer les logs des confessions',
-                        value: 'logs',
-                        emoji: '📋'
-                    },
-                    {
-                        label: 'Auto-Thread Confessions',
-                        description: 'Configurer la création automatique de threads',
-                        value: 'autothread',
-                        emoji: '🧵'
-                    }
+                    { label: 'Gérer les Canaux de Confession', description: 'Activer/désactiver les canaux autorisés', value: 'channels', emoji: '📝' },
+                    { label: 'Canal de Logs', description: 'Définir où envoyer les logs des confessions', value: 'logs', emoji: '📋' },
+                    { label: 'Auto-Thread Confessions', description: 'Configurer la création automatique de threads', value: 'autothread', emoji: '🧵' }
                 ])
         );
 
-    const method = interaction.replied || interaction.deferred ? 'editReply' : 'reply';
-    await interaction[method]({
-        embeds: [embed],
-        components: [row],
-        flags: 64
-    });
+    const method = interaction.deferred || interaction.replied ? 'editReply' : 'reply';
+    await interaction[method]({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showChannelsConfig(interaction) {
@@ -200,10 +177,7 @@ async function showChannelsConfig(interaction) {
                 ])
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showChannelAdd(interaction) {
@@ -216,7 +190,7 @@ async function showChannelAdd(interaction) {
         .addComponents(
             new ChannelSelectMenuBuilder()
                 .setCustomId('config_channel_add')
-                .setChannelTypes([0]) // Text channels only
+                .setChannelTypes([0])
                 .setPlaceholder('📝 Sélectionner un canal textuel...')
         );
 
@@ -228,10 +202,7 @@ async function showChannelAdd(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function addChannel(interaction) {
@@ -242,7 +213,8 @@ async function addChannel(interaction) {
         return await interaction.update({
             content: `❌ Le canal sélectionné n'existe plus.`,
             embeds: [],
-            components: []
+            components: [],
+            flags: 64
         });
     }
 
@@ -250,7 +222,8 @@ async function addChannel(interaction) {
         return await interaction.update({
             content: `❌ Le canal ${channel} est déjà configuré comme canal de confession.`,
             embeds: [],
-            components: []
+            components: [],
+            flags: 64
         });
     }
 
@@ -274,10 +247,7 @@ async function addChannel(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showChannelRemove(interaction) {
@@ -295,10 +265,7 @@ async function showChannelRemove(interaction) {
                     .setStyle(ButtonStyle.Secondary)
             );
 
-        return await interaction.update({
-            embeds: [embed],
-            components: [row]
-        });
+        return await interaction.update({ embeds: [embed], components: [row], flags: 64 });
     }
 
     const embed = new EmbedBuilder()
@@ -332,10 +299,7 @@ async function showChannelRemove(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function removeChannel(interaction) {
@@ -365,10 +329,7 @@ async function removeChannel(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showLogsConfig(interaction) {
@@ -384,7 +345,7 @@ async function showLogsConfig(interaction) {
         .addComponents(
             new ChannelSelectMenuBuilder()
                 .setCustomId('config_log_channel')
-                .setChannelTypes([0]) // Text channels only
+                .setChannelTypes([0])
                 .setPlaceholder('📋 Sélectionner un canal pour les logs...')
         );
 
@@ -396,10 +357,7 @@ async function showLogsConfig(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function setLogChannel(interaction) {
@@ -410,7 +368,8 @@ async function setLogChannel(interaction) {
         return await interaction.update({
             content: `❌ Le canal sélectionné n'existe plus.`,
             embeds: [],
-            components: []
+            components: [],
+            flags: 64
         });
     }
 
@@ -433,10 +392,7 @@ async function setLogChannel(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showAutoThreadConfig(interaction) {
@@ -466,24 +422,9 @@ async function showAutoThreadConfig(interaction) {
                 .setCustomId('config_autothread_action')
                 .setPlaceholder('🧵 Sélectionner une action...')
                 .addOptions([
-                    {
-                        label: 'Ajouter un Canal',
-                        description: 'Activer l\'auto-thread pour un canal',
-                        value: 'add',
-                        emoji: '➕'
-                    },
-                    {
-                        label: 'Retirer un Canal',
-                        description: 'Désactiver l\'auto-thread pour un canal',
-                        value: 'remove',
-                        emoji: '➖'
-                    },
-                    {
-                        label: 'Paramètres Avancés',
-                        description: 'Configurer la durée d\'archivage et autres options',
-                        value: 'settings',
-                        emoji: '⚙️'
-                    }
+                    { label: 'Ajouter un Canal', description: 'Activer l\'auto-thread pour un canal', value: 'add', emoji: '➕' },
+                    { label: 'Retirer un Canal', description: 'Désactiver l\'auto-thread pour un canal', value: 'remove', emoji: '➖' },
+                    { label: 'Paramètres Avancés', description: 'Configurer la durée d\'archivage et autres options', value: 'settings', emoji: '⚙️' }
                 ])
         );
 
@@ -495,10 +436,7 @@ async function showAutoThreadConfig(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function showAutoThreadAdd(interaction) {
@@ -523,15 +461,11 @@ async function showAutoThreadAdd(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function showAutoThreadRemove(interaction) {
     const autoThreadConfig = config.autoThreadSettings || { channels: [] };
-    
     if (autoThreadConfig.channels.length === 0) {
         const embed = new EmbedBuilder()
             .setColor('#ff0000')
@@ -546,10 +480,7 @@ async function showAutoThreadRemove(interaction) {
                     .setStyle(ButtonStyle.Secondary)
             );
 
-        return await interaction.update({
-            embeds: [embed],
-            components: [row]
-        });
+        return await interaction.update({ embeds: [embed], components: [row], flags: 64 });
     }
 
     const options = [];
@@ -585,10 +516,7 @@ async function showAutoThreadRemove(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function addAutoThreadChannel(interaction) {
@@ -599,7 +527,8 @@ async function addAutoThreadChannel(interaction) {
         return await interaction.update({
             content: `❌ Le canal sélectionné n'existe plus.`,
             embeds: [],
-            components: []
+            components: [],
+            flags: 64
         });
     }
 
@@ -636,10 +565,7 @@ async function addAutoThreadChannel(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function removeAutoThreadChannel(interaction) {
@@ -650,11 +576,9 @@ async function removeAutoThreadChannel(interaction) {
         const index = config.autoThreadSettings.channels.indexOf(channelId);
         if (index > -1) {
             config.autoThreadSettings.channels.splice(index, 1);
-
             if (config.autoThreadSettings.channels.length === 0) {
                 config.autoThreadSettings.enabled = false;
             }
-
             fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
         }
     }
@@ -676,10 +600,7 @@ async function removeAutoThreadChannel(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
 
 async function showAutoThreadSettings(interaction) {
@@ -709,30 +630,10 @@ async function showAutoThreadSettings(interaction) {
                 .setCustomId('config_autothread_settings')
                 .setPlaceholder('⚙️ Choisir une durée d\'archivage...')
                 .addOptions([
-                    {
-                        label: '1 heure',
-                        description: 'Archives automatiquement après 1 heure',
-                        value: '60',
-                        emoji: '⏰'
-                    },
-                    {
-                        label: '24 heures',
-                        description: 'Archives automatiquement après 24 heures',
-                        value: '1440',
-                        emoji: '📅'
-                    },
-                    {
-                        label: '3 jours',
-                        description: 'Archives automatiquement après 3 jours',
-                        value: '4320',
-                        emoji: '📋'
-                    },
-                    {
-                        label: '1 semaine',
-                        description: 'Archives automatiquement après 1 semaine',
-                        value: '10080',
-                        emoji: '📄'
-                    }
+                    { label: '1 heure', description: 'Archives automatiquement après 1 heure', value: '60', emoji: '⏰' },
+                    { label: '24 heures', description: 'Archives automatiquement après 24 heures', value: '1440', emoji: '📅' },
+                    { label: '3 jours', description: 'Archives automatiquement après 3 jours', value: '4320', emoji: '📋' },
+                    { label: '1 semaine', description: 'Archives automatiquement après 1 semaine', value: '10080', emoji: '📄' }
                 ])
         );
 
@@ -744,15 +645,11 @@ async function showAutoThreadSettings(interaction) {
                 .setStyle(ButtonStyle.Secondary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row1, row2]
-    });
+    await interaction.update({ embeds: [embed], components: [row1, row2], flags: 64 });
 }
 
 async function updateAutoThreadSettings(interaction) {
     const newArchiveTime = parseInt(interaction.values[0]);
-
     if (!config.autoThreadSettings) {
         config.autoThreadSettings = {
             enabled: true,
@@ -762,7 +659,6 @@ async function updateAutoThreadSettings(interaction) {
             slowMode: 0
         };
     }
-
     config.autoThreadSettings.archiveAfter = newArchiveTime;
     fs.writeFileSync('./config.json', JSON.stringify(config, null, 4));
 
@@ -792,8 +688,5 @@ async function updateAutoThreadSettings(interaction) {
                 .setStyle(ButtonStyle.Primary)
         );
 
-    await interaction.update({
-        embeds: [embed],
-        components: [row]
-    });
+    await interaction.update({ embeds: [embed], components: [row], flags: 64 });
 }
