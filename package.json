@@ -13,7 +13,8 @@
     "discord.js": "^14.11.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "sharp": "^0.32.6"
   },
   "keywords": [
     "discord",
@@ -21,7 +22,9 @@
     "render",
     "config",
     "menu",
-    "economy"
+    "economy",
+    "image",
+    "sharp"
   ],
   "author": "Douv21",
   "license": "MIT"
