@@ -135,7 +135,7 @@ async function showMainAutoThread(interaction) {
     await interaction[method]({
         embeds: [embed],
         components: [row1],
-        ephemeral: method === 'reply' ? true : undefined
+        flags: method === 'reply' ? 64 : undefined
     });
 }
 

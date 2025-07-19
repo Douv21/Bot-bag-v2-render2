@@ -126,7 +126,7 @@ module.exports = {
             
             await interaction.reply({
                 content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.',
-                ephemeral: true
+                flags: 64
             }).catch(() => {
                 interaction.editReply({
                     content: '❌ Une erreur s\'est produite lors du traitement de votre sélection.'
@@ -187,7 +187,7 @@ async function showMainConfig(interaction) {
     await interaction[method]({
         embeds: [embed],
         components: [row],
-        ephemeral: true
+        flags: 64
     });
 }
 
