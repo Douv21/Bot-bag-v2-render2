@@ -2,7 +2,11 @@ module.exports = {
   name: 'interactionCreate',
   async execute(interaction, client) {
     // Vérifie les types d'interactions
-    if (!interaction.isButton() && !interaction.isStringSelectMenu()) return;
+    if (
+      !interaction.isButton() &&
+      !interaction.isStringSelectMenu() &&
+      !interaction.isChannelSelectMenu()
+    ) return;
 
     const [command, action] = interaction.customId.split('_');
 
@@ -21,7 +25,7 @@ module.exports = {
         }
       }
 
-      if (interaction.isStringSelectMenu()) {
+      if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
         if (handler.run) {
           await handler.run(interaction, client);
         } else if (handler.handleSelectMenuInteraction) {
