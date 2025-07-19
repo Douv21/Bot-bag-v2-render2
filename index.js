@@ -219,9 +219,7 @@ client.on('messageCreate', async (message) => {
     }
 });
 
-// Interaction event
-client.on('interactionCreate', async interaction => {
-    try {
+// Interaction event (CORRECTED - NO DUPLICATE, CHANNEL SELECT MENU INCLUDED)
 client.on('interactionCreate', async interaction => {
     try {
         if (interaction.isChatInputCommand()) {
@@ -236,7 +234,7 @@ client.on('interactionCreate', async interaction => {
         } else if (
             interaction.isButton() ||
             interaction.isStringSelectMenu() ||
-            interaction.isChannelSelectMenu() ||   // <--- AJOUTER CETTE LIGNE
+            interaction.isChannelSelectMenu() ||
             interaction.isModalSubmit()
         ) {
             // Handle button, select menu (string+channel), and modal interactions
