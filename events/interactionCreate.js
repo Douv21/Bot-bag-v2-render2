@@ -1,46 +1,44 @@
 module.exports = {
   name: 'interactionCreate',
   async execute(interaction, client) {
-    // Vérifie les types d'interactions
+    // Gère boutons, menus string, menus channel
     if (
       !interaction.isButton() &&
       !interaction.isStringSelectMenu() &&
       !interaction.isChannelSelectMenu()
     ) return;
 
-    const [command, action] = interaction.customId.split('_');
+    // Conventions : customId = <commande>_<action>
+    const [command] = interaction.customId.split('_');
 
     try {
-      // Chargement du handler selon la convention /commands/<command>/<action>.js
-      const handlerPath = `../commands/${command}/config_${action}.js`;
+      // Convention : dossier /commands/<command>.js
+      // Pour la structure modulaire, adapte le chemin ici si besoin
+      const handlerPath = `../commands/${command}.js`;
       const handler = require(handlerPath);
 
       if (interaction.isButton()) {
-        if (handler.run) {
-          await handler.run(interaction, client);
-        } else if (handler.handleButtonInteraction) {
+        if (handler.handleButtonInteraction) {
           await handler.handleButtonInteraction(interaction, client);
-        } else {
-          console.warn(`⚠️ Le handler ${handlerPath} ne contient pas de méthode valide pour bouton.`);
+        } else if (handler.run) {
+          await handler.run(interaction, client);
         }
       }
 
       if (interaction.isStringSelectMenu() || interaction.isChannelSelectMenu()) {
-        if (handler.run) {
-          await handler.run(interaction, client);
-        } else if (handler.handleSelectMenuInteraction) {
+        if (handler.handleSelectMenuInteraction) {
           await handler.handleSelectMenuInteraction(interaction, client);
-        } else {
-          console.warn(`⚠️ Le handler ${handlerPath} ne contient pas de méthode valide pour menu.`);
+        } else if (handler.run) {
+          await handler.run(interaction, client);
         }
       }
 
     } catch (error) {
       console.error(`❌ Erreur dans l'interaction ${interaction.customId}:`, error);
-      if (interaction.replied || interaction.deferred) {
-        await interaction.followUp({ content: '❌ Une erreur est survenue lors de l\'interaction.', ephemeral: true });
-      } else {
+      if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({ content: '❌ Une erreur est survenue lors de l\'interaction.', ephemeral: true });
+      } else {
+        await interaction.editReply({ content: '❌ Une erreur est survenue lors de l\'interaction.' });
       }
     }
   }
