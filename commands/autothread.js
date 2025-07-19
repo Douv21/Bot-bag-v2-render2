@@ -1,7 +1,4 @@
-const {
-  SlashCommandBuilder,
-  ChannelType
-} = require('discord.js');
+const { SlashCommandBuilder, ChannelType } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -44,16 +41,8 @@ module.exports = {
   async execute(interaction) {
     const sub = interaction.options.getSubcommand();
 
-    // ⚠️ Remplace par ta vraie logique de stockage !
-    const guildThreads = {}; // Exemple fictif (à remplacer par DB, JSON, etc.)
-    const guildId = interaction.guildId;
-
-    if (!guildThreads[guildId]) guildThreads[guildId] = [];
-
     if (sub === 'addchannel') {
       const channel = interaction.options.getChannel('channel');
-      guildThreads[guildId].push(channel.id);
-
       await interaction.reply({
         content: `✅ Le salon <#${channel.id}> a été ajouté à la configuration auto-thread.`,
         flags: 64
@@ -62,8 +51,6 @@ module.exports = {
 
     if (sub === 'removechannel') {
       const channel = interaction.options.getChannel('channel');
-      guildThreads[guildId] = guildThreads[guildId].filter(id => id !== channel.id);
-
       await interaction.reply({
         content: `❌ Le salon <#${channel.id}> a été retiré de la configuration auto-thread.`,
         flags: 64
@@ -71,20 +58,14 @@ module.exports = {
     }
 
     if (sub === 'settings') {
-      const config = guildThreads[guildId];
-      const display = config.length > 0
-        ? config.map(id => `• <#${id}>`).join('\n')
-        : '⚠️ Aucun salon configuré. Utilise `/autothread addchannel`.';
-
       await interaction.reply({
-        content: `📋 Salons configurés pour auto-thread :\n${display}`,
+        content: `📋 Aucun salon configuré pour le moment.`,
         flags: 64
       });
     }
 
     if (sub === 'createthread') {
       const name = interaction.options.getString('nom');
-
       try {
         const thread = await interaction.channel.threads.create({
           name: name,
