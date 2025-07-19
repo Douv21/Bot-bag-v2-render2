@@ -5,7 +5,7 @@ const filePath = path.join(__dirname, '../data/autothread.json');
 
 function loadConfig() {
   try {
-    const raw = fs.readFileSync(filePath);
+    const raw = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(raw);
   } catch {
     return {};
