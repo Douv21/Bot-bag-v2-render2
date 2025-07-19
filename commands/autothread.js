@@ -89,7 +89,7 @@ module.exports = {
         const thread = await interaction.channel.threads.create({
           name,
           autoArchiveDuration: 60,
-          reason: 'Créé par /autothread'
+          reason: 'Créé via /autothread'
         });
 
         await interaction.reply({
@@ -97,7 +97,7 @@ module.exports = {
           flags: 64
         });
       } catch (err) {
-        console.error(err);
+        console.error('Erreur création thread :', err);
         await interaction.reply({
           content: `❌ Impossible de créer le thread. Vérifie les permissions.`,
           flags: 64
